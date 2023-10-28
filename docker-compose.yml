@@ -1,0 +1,24 @@
+
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=postgres
+      - POSTGRES_PORT=5433
+      - POSTGRES_DB=postgres
+    container_name: postgres
+    ports:
+      - 5433:5433
+    command: -p 5433
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nest-docker-postgres
+    ports:
+      - '3023:3023'
+    volumes:
+      - ./src:/app/src

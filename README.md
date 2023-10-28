@@ -21,3 +21,12 @@ $ npm run build
 ```bash
 $ npm run start
 ```
+
+---
+
+## Docker
+
+### run
+```bash
+$ docker-compose up
+```
