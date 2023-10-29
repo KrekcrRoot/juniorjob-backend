@@ -8,6 +8,9 @@ import { User } from './users/user.entity';
 import { City } from './cities/city.entity';
 import { UsersModule } from './users/users.module';
 import { CitiesModule } from './cities/cities.module';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -26,8 +29,9 @@ import { CitiesModule } from './cities/cities.module';
     }),
     UsersModule,
     CitiesModule,
+    AuthModule,
   ],
-  controllers: [CoursesController, RolesController],
-  providers: [],
+  controllers: [CoursesController, RolesController, AuthController],
+  providers: [AuthService],
 })
 export class AppModule {}

@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('Courses')
 export class Course {
   @PrimaryGeneratedColumn()
   id: bigint;

@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import logger from './logger';
 import * as process from 'process';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   // App constants
@@ -19,7 +20,11 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup(`api`, app, document);
+  SwaggerModule.setup(`docs`, app, document);
+
+  // Validator
+
+  app.useGlobalPipes(new ValidationPipe());
 
   // Running app
 

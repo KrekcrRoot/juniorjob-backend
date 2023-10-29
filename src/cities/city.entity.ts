@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Models')
-@Entity()
+@Entity('Cities')
 export class City {
   @ApiProperty({
     example: '550e8400-e29b-41d4-a716-446655440000',
