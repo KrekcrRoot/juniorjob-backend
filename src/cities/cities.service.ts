@@ -14,8 +14,8 @@ export class CitiesService implements OnModuleInit {
     return await this.citiesRepository.find();
   }
 
-  async getCityById(uuid: string): Promise<City | undefined> {
-    return await this.citiesRepository.findOne({ where: { id: uuid } });
+  async getCityByUUID(uuid: string): Promise<City | undefined> {
+    return await this.citiesRepository.findOne({ where: { uuid: uuid } });
   }
 
   async getCityByName(name: string): Promise<City | undefined> {

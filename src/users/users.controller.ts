@@ -12,9 +12,9 @@ export class UsersController {
     status: 200,
     type: User,
     isArray: true,
-    description: 'Получение всех пользователей',
+    description: 'Response all users',
   })
-  @ApiOperation({ summary: 'Получение всех пользователей' })
+  @ApiOperation({ summary: 'Get all users' })
   @Get()
   getAll(): Promise<User[]> {
     return this.usersService.getAllUsers();

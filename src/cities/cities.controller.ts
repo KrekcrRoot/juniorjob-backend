@@ -48,6 +48,6 @@ export class CitiesController {
     if (!isUUID(params.uuid)) {
       throw new HttpException('Not valid uuid', HttpStatus.BAD_REQUEST);
     }
-    return this.citiesService.getCityById(params.uuid);
+    return this.citiesService.getCityByUUID(params.uuid);
   }
 }

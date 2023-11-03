@@ -17,7 +17,7 @@ export class User {
     description: 'UUID for user',
   })
   @PrimaryGeneratedColumn(`uuid`)
-  id: string;
+  uuid: string;
 
   @ApiProperty({
     example: 'email@gmail.com',
@@ -27,7 +27,7 @@ export class User {
   email: string;
 
   @ApiProperty({
-    example: '64dfb04e',
+    example: '$2a$12$kU0ho5CS/ARY/3iwnn5iZ.Urn/pZ.2IuWraeb8T/VJYwbDYKjqxDm',
     description: 'Hash password for user',
   })
   @Column()
@@ -44,7 +44,7 @@ export class User {
     example: City,
     description: 'City relation for user',
   })
-  @ManyToOne(() => City, (city) => city.id)
+  @ManyToOne(() => City, (city) => city.uuid)
   @JoinColumn()
   city: City;
 
@@ -75,4 +75,11 @@ export class User {
   })
   @Column({ default: false })
   banned: boolean;
+
+  @ApiProperty({
+    example: '$2a$12$x.iAJfRanYimAVUlhSB1OenZkKNMbgTnh6X4jTMV70etczsrSdv0.',
+    description: 'Hashed refresh token',
+  })
+  @Column({ nullable: true })
+  hashedRefreshToken: string;
 }

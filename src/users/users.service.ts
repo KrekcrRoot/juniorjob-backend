@@ -26,11 +26,27 @@ export class UsersService {
   }
 
   async createUser(dto: CreateUserDto): Promise<User> {
+    // Hashing password
+    dto.password = await bcrypt.hash(dto.password, 10);
+
+    // Creating user
     const user = this.usersRepository.create({
       ...dto,
     });
-    user.password = await bcrypt.hash(dto.password, await bcrypt.genSalt());
-    await this.usersRepository.save(user);
-    return user;
+
+    // Returning user
+    return this.usersRepository.save(user);
+  }
+
+  async saveUser(user: User): Promise<User> {
+    return this.usersRepository.save(user);
+  }
+
+  async update(user_uuid: string, data: any) {
+    return this.usersRepository.update({
+      uuid: user_uuid,
+    }, {
+      ...data,
+    })
   }
 }
