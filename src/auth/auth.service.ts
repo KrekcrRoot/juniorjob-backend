@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -15,12 +16,16 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+
+  saltOrRounds = 10;
+
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
     private citiesService: CitiesService,
     private configService: ConfigService,
   ) {}
+  
 
   async signinLocal(signInAuthDto: SignInAuthDto) {
     const user = await this.userService.findOne(signInAuthDto.email);
@@ -79,18 +84,21 @@ export class AuthService {
     }
 
     const tokens = await this.tokens(dto);
-    await this.updateRefreshToken(user.uuid, tokens.refresh_token);
+    await this.setRefreshToken(user.uuid, tokens.refresh_token);
 
     return tokens;
-
   }
 
-  async updateRefreshToken(user_uuid: string, refresh_token: string) {
-    const hashedRefreshToken = await bcrypt.hash(refresh_token, 10);
-    this.userService.update(user_uuid, hashedRefreshToken);
+  async setRefreshToken(user_uuid: string, refresh_token: string) {
+    const hashedRefreshToken = await bcrypt.hash(refresh_token, this.saltOrRounds);
+    this.userService.update_refresh_token(user_uuid, hashedRefreshToken);
   }
 
-  async logout() {}
+  async logout(user_uuid: string): Promise<void> {
+    let user = await this.userService.findByUUID(user_uuid);
+    user.hashedRefreshToken = null;
+    this.userService.saveUser(user);
+  }
 
 
 
@@ -114,4 +122,25 @@ export class AuthService {
     };
   }
 
+  async refreshTokens(user_payload: UserJwtDto, refresh_token: string) {
+
+    let user = await this.userService.findByUUID(user_payload.uuid);
+
+
+    if(!user || !user.hashedRefreshToken) throw new ForbiddenException('Access denied');
+
+    const token_verify = await bcrypt.compare(refresh_token, user.hashedRefreshToken);
+
+    if(!token_verify) throw new ForbiddenException('Access denied');
+
+    const payload: UserJwtDto = {
+      uuid: user.uuid,
+      email: user.email,
+    }
+
+    const tokens = await this.tokens(payload);
+    this.setRefreshToken(user.uuid, tokens.refresh_token);
+
+    return tokens;
+  }
 }

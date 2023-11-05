@@ -25,6 +25,12 @@ export class UsersService {
     });
   }
 
+  async findByUUID(user_uuid: string): Promise<User | null> {
+    return this.usersRepository.findOneBy({
+      uuid: user_uuid,
+    });
+  }
+
   async createUser(dto: CreateUserDto): Promise<User> {
     // Hashing password
     dto.password = await bcrypt.hash(dto.password, 10);
@@ -42,11 +48,12 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async update(user_uuid: string, data: any) {
-    return this.usersRepository.update({
+  async update_refresh_token(user_uuid: string, hashed_token: string): Promise<User | null> {
+    let user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
-    }, {
-      ...data,
     })
+
+    user.hashedRefreshToken = hashed_token;
+    return this.usersRepository.save(user);
   }
 }

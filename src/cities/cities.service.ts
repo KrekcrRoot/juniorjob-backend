@@ -22,6 +22,14 @@ export class CitiesService implements OnModuleInit {
     return await this.citiesRepository.findOne({ where: { title: name } });
   }
 
+  async storeCity(name: string): Promise<City | null> {
+    const city = this.citiesRepository.create({
+      title: name,
+    })
+
+    return this.citiesRepository.save(city);
+  }
+
   onModuleInit(): void {
     logger.log({ level: 'info', message: 'Cities init' });
   }

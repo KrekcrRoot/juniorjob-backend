@@ -1,4 +1,4 @@
-import { Controller, Get, HttpException, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, Post, HttpException, HttpStatus, Param } from '@nestjs/common';
 import { CitiesService } from './cities.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { City } from './city.entity';
@@ -49,5 +49,10 @@ export class CitiesController {
       throw new HttpException('Not valid uuid', HttpStatus.BAD_REQUEST);
     }
     return this.citiesService.getCityByUUID(params.uuid);
+  }
+
+  @Post('/store/:name')
+  storeCity(@Param() params: any): Promise<City | null> {
+    return this.citiesService.storeCity(params.name);
   }
 }
