@@ -1,18 +1,21 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import { SignInAuthDto } from './dto/signin-auth.dto';
+import * as argon2 from 'argon2';
+import { SignInAuthDto } from './dto/signin-auth.dto'; 
 import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { CitiesService } from 'src/cities/cities.service';
 import { Tokens } from './dto/tokens.dto';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 import { ConfigService } from '@nestjs/config';
+import { TokenUpdateReq } from './dto/token-update-req.dto';
 
 @Injectable()
 export class AuthService {
@@ -34,25 +37,25 @@ export class AuthService {
       throw new BadRequestException('There is no user with this email');
     }
 
-    const result = await bcrypt.compare(signInAuthDto.password, user.password);
+    const result = await argon2.verify(user.password, signInAuthDto.password);
 
     if (!result) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Login or password is incorrect');
     }
 
-    const payload = {
-      user_id: user.uuid,
-      user_banned: user.banned,
-      user_email: user.email,
-      user_city: user.city,
-      user_photo: user.photo,
-    };
+    const payload: UserJwtDto = {
+      uuid: user.uuid,
+      email: user.email,
+    }
 
-    const jwtResult = await this.jwtService.signAsync(payload);
+    const tokens = await this.tokens(payload);
+    this.setRefreshToken(user.uuid, tokens.refresh_token);
 
-    return {
-      access_token: jwtResult,
-    };
+    return tokens;
+  }
+
+  async hashData(data: string) {
+    return argon2.hash(data);
   }
 
   async signupLocal(signUpAuthDto: SignUpAuthDto): Promise<Tokens> {
@@ -90,14 +93,30 @@ export class AuthService {
   }
 
   async setRefreshToken(user_uuid: string, refresh_token: string) {
-    const hashedRefreshToken = await bcrypt.hash(refresh_token, this.saltOrRounds);
+    const hashedRefreshToken = await this.hashData(refresh_token);
     this.userService.update_refresh_token(user_uuid, hashedRefreshToken);
   }
 
-  async logout(user_uuid: string): Promise<void> {
+  async logout(user_uuid: string) {
     let user = await this.userService.findByUUID(user_uuid);
+
+    if(user.hashedRefreshToken == null) throw new HttpException('User is not logged', HttpStatus.BAD_REQUEST);
+
     user.hashedRefreshToken = null;
-    this.userService.saveUser(user);
+    const saved_user = await this.userService.saveUser(user);
+
+    if(saved_user) {
+      return {
+        message: 'Logout success',
+        statusCode: 200,
+      }
+    } else {
+      return {
+        message: 'Logout unsuccessed',
+        statusCode: 500,
+      }
+    }
+
   }
 
 
@@ -122,14 +141,22 @@ export class AuthService {
     };
   }
 
-  async refreshTokens(user_payload: UserJwtDto, refresh_token: string) {
+  async refreshTokens(tokenUpdateReq: TokenUpdateReq) {
 
-    let user = await this.userService.findByUUID(user_payload.uuid);
-
-
+    const expired_access_token = this.jwtService.decode(tokenUpdateReq.access_token) as UserJwtDto;
+    let user = await this.userService.findByUUID(expired_access_token.uuid);
+    
     if(!user || !user.hashedRefreshToken) throw new ForbiddenException('Access denied');
 
-    const token_verify = await bcrypt.compare(refresh_token, user.hashedRefreshToken);
+    try {
+      this.jwtService.verify(tokenUpdateReq.refresh_token, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      })
+    } catch(error) {
+      throw new ForbiddenException('Refresh token expired or invalid');
+    }
+
+    const token_verify = await argon2.verify(user.hashedRefreshToken, tokenUpdateReq.refresh_token);
 
     if(!token_verify) throw new ForbiddenException('Access denied');
 

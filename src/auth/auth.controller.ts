@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, HttpCode, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, ForbiddenException, HttpCode, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInAuthDto } from './dto/signin-auth.dto';
@@ -7,6 +7,7 @@ import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 import { isJWT } from 'class-validator';
+import { TokenUpdateReq } from './dto/token-update-req.dto';
 
 interface tokenRequest extends Request {
   user: UserJwtDto;
@@ -51,20 +52,10 @@ export class AuthController {
   })
   @ApiBearerAuth()
   @ApiOperation({ summary: 'refresh tokens' })
-  @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Post('/refresh')
-  refresh(@Req() req: tokenRequest) {
-    const refresh_token = req.body['refresh_token'];
-    if(!refresh_token) {
-      throw new BadRequestException('Refresh token is required');
-    }
-
-    if(!isJWT(refresh_token)) {
-      throw new BadRequestException('Refresh token must be JWT');
-    }
-
-    return this.authService.refreshTokens(req.user, refresh_token);
+  refresh(@Body() tokenUpdateReq: TokenUpdateReq) {
+    return this.authService.refreshTokens(tokenUpdateReq);
   }
 
   @ApiResponse({
@@ -74,8 +65,8 @@ export class AuthController {
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Post('/logout')
-  logout(@Req() req: Request) {
-    console.log(req);
-    // return this.authService.logout(req);
+  logout(@Req() req: tokenRequest) {
+    if(!req.user['uuid']) throw new ForbiddenException('Access token is invalid');
+    return this.authService.logout(req.user['uuid']);
   }
 }
