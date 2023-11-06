@@ -1,7 +1,13 @@
-import { Controller, Get, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Param, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
+import { UserJwtDto } from './dto/user-jwt.dto';
+
+interface tokenRequest extends Request {
+  user: UserJwtDto;
+}
 
 @ApiTags('Users')
 @Controller('users')
@@ -18,6 +24,19 @@ export class UsersController {
   @Get()
   getAll(): Promise<User[]> {
     return this.usersService.getAllUsers();
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: User,
+    isArray: true,
+    description: 'Find user by access token',
+  })
+  @ApiOperation({ summary: 'Find user by access token' })
+  @UseGuards(AccessTokenGuard)
+  @Get('/my')
+  getInfoByToken(@Req() req: tokenRequest) {
+    return this.usersService.findByUUID(req.user.uuid);
   }
   
   @ApiResponse({

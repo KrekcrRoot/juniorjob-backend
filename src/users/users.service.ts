@@ -36,8 +36,14 @@ export class UsersService {
   }
 
   async findByUUID(user_uuid: string): Promise<User | null> {
-    return this.usersRepository.findOneBy({
-      uuid: user_uuid,
+    return this.usersRepository.findOne({
+      where: {
+        uuid: user_uuid,
+      },
+      relations: {
+        city: true,
+        role: true,
+      }
     });
   }
 
