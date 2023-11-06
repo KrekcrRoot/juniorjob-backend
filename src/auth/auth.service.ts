@@ -20,8 +20,6 @@ import { TokenUpdateReq } from './dto/token-update-req.dto';
 @Injectable()
 export class AuthService {
 
-  saltOrRounds = 10;
-
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,

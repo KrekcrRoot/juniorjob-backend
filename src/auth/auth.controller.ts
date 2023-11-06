@@ -6,7 +6,6 @@ import { Tokens } from './dto/tokens.dto';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
-import { isJWT } from 'class-validator';
 import { TokenUpdateReq } from './dto/token-update-req.dto';
 
 interface tokenRequest extends Request {

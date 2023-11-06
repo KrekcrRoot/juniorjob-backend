@@ -4,11 +4,13 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { City } from '../cities/city.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { Role } from 'src/roles/role.entity';
 
 @Entity('Users')
 export class User {
@@ -27,7 +29,7 @@ export class User {
   email: string;
 
   @ApiProperty({
-    example: '$2a$12$kU0ho5CS/ARY/3iwnn5iZ.Urn/pZ.2IuWraeb8T/VJYwbDYKjqxDm',
+    example: '$argon2i$v=19$m=16,t=2,p=1$MTIzNDIzNDU2NDU2NDU2$Lxgzhxe4rT83ET0XMJProQ',
     description: 'Hash password for user',
   })
   @Column()
@@ -47,6 +49,14 @@ export class User {
   @ManyToOne(() => City, (city) => city.uuid)
   @JoinColumn()
   city: City;
+
+  @ApiProperty({
+    example: Role,
+    description: 'Role relation for user',
+  })
+  @OneToOne(() => Role, (role) => role.uuid)
+  @JoinColumn()
+  role: Role;
 
   @ApiProperty({
     example: new Date(),
@@ -77,7 +87,14 @@ export class User {
   banned: boolean;
 
   @ApiProperty({
-    example: '$2a$12$x.iAJfRanYimAVUlhSB1OenZkKNMbgTnh6X4jTMV70etczsrSdv0.',
+    example: false,
+    description: 'Deleted user marker',
+  })
+  @Column({ default: false })
+  deleted: boolean;
+
+  @ApiProperty({
+    example: '$argon2i$v=19$m=16,t=2,p=1$MTIzNDIzNDU2NDU2NDU2$Lxgzhxe4rT83ET0XMJProQ',
     description: 'Hashed refresh token',
   })
   @Column({ nullable: true })

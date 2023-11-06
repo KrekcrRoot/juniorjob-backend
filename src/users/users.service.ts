@@ -5,16 +5,26 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CitiesService } from '../cities/cities.service';
 import * as argon2 from 'argon2';
+import { Applicant } from 'src/roles/models/applicant-role.entity';
+import { Individual } from 'src/roles/models/individual-role.entity';
+import { LegalEntity } from 'src/roles/models/legal-role.entity';
+import { Role } from 'src/roles/role.entity';
+import { Moderator } from 'src/roles/models/moderator-role.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(Applicant) private applicantRepository: Repository<Applicant>,
+    @InjectRepository(Individual) private individualRepository: Repository<Individual>,
+    @InjectRepository(LegalEntity) private legalEntityRepository: Repository<LegalEntity>,
+    @InjectRepository(Moderator) private moderatorRepository: Repository<Moderator>,
+    @InjectRepository(Role) private roleRepository: Repository<Role>,
     private citiesService: CitiesService,
   ) {}
 
   async getAllUsers(): Promise<User[]> {
-    return await this.usersRepository.find({ relations: { city: true } });
+    return await this.usersRepository.find({ relations: { city: true, role: true } });
   }
 
   async findOne(email: string): Promise<User | null> {
@@ -40,8 +50,29 @@ export class UsersService {
       ...dto,
     });
 
+    const applicant = this.applicantRepository.create();
+    const individual = this.individualRepository.create();
+    const legal_entity = this.legalEntityRepository.create();
+    const moderator = this.moderatorRepository.create();
+
+    await this.applicantRepository.save(applicant);
+    await this.individualRepository.save(individual);
+    await this.legalEntityRepository.save(legal_entity);
+    await this.moderatorRepository.save(moderator);
+
+    const user_role = this.roleRepository.create({
+      applicant: applicant,
+      individual: individual,
+      legal_entity: legal_entity,
+      moderator: moderator,
+    })
+
+    await this.roleRepository.save(user_role);
+
+    user.role = user_role;
+
     // Returning user
-    return this.usersRepository.save(user);
+    return await this.usersRepository.save(user);
   }
 
   async saveUser(user: User): Promise<User> {
