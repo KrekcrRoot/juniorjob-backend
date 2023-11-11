@@ -7,6 +7,10 @@ import { Individual } from './models/individual-role.entity';
 import { LegalEntity } from './models/legal-role.entity';
 import { Moderator } from './models/moderator-role.entity';
 import { Role } from './role.entity';
+import { ApplicantUpdateDto } from './dto/applicant-update.dto';
+import { IndividualUpdateDto } from './dto/individual-update.dto';
+import { LegalEntityUpdateDto } from './dto/legal-update.dto';
+import { ModeratorUpdateDto } from './dto/moderator-update.dto';
 
 @Injectable()
 export class RolesService {
@@ -102,6 +106,84 @@ export class RolesService {
     if(!legal_entity) throw new BadRequestException('Legal entity not found');
 
     return legal_entity;
+
+  }
+
+
+  // Updating roles
+
+  async updateApplicant(applicantDto: ApplicantUpdateDto, applicant_uuid: string) {
+
+    let role = await this.applicantRepository.findOneBy({
+      uuid: applicant_uuid,
+    });
+
+    if(!role) {
+      throw new BadRequestException('Role doesn\'t exist with this uuid');
+    }
+
+    role = {
+      uuid: role.uuid,
+      ...applicantDto
+    };
+
+    return await this.applicantRepository.save(role); 
+  }
+
+  async updateIndividual(individualDto: IndividualUpdateDto, individual_uuid: string) {
+
+    let role = await this.individualRepository.findOneBy({
+      uuid: individual_uuid,
+    });
+
+    if(!role) {
+      throw new BadRequestException('Role doesn\'t exist with this uuid');
+    }
+
+    role = {
+      uuid: role.uuid,
+      ...individualDto,
+    };
+
+    return await this.individualRepository.save(role);
+
+  }
+
+  async updateLegalEntity(legalEntityDto: LegalEntityUpdateDto, legal_entity_uuid: string) {
+
+    let role = await this.legalEntityRepository.findOneBy({
+      uuid: legal_entity_uuid,
+    });
+
+    if(!role) {
+      throw new BadRequestException('Role doesn\'t exist with this uuid');
+    }
+
+    role = {
+      uuid: role.uuid,
+      ...legalEntityDto,
+    };
+
+    return await this.legalEntityRepository.save(role);
+
+  }
+
+  async updateModerator(moderatorDto: ModeratorUpdateDto, moderator_uuid: string) {
+
+    let role = await this.moderatorRepository.findOneBy({
+      uuid: moderator_uuid,
+    });
+
+    if(!role) {
+      throw new BadRequestException('Role doesn\'t exist with this uuid');
+    }
+
+    role = {
+      uuid: role.uuid,
+      ...moderatorDto,
+    };
+
+    return await this.moderatorRepository.save(role);
 
   }
 

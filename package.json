@@ -1,8 +1,8 @@
 {
   "name": "juniorjob-backend",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "version": "0.1.0",
+  "description": "Junior Job backend NestJS",
+  "author": "niko",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

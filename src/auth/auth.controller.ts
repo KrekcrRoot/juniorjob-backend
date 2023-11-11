@@ -61,6 +61,7 @@ export class AuthController {
     status: HttpStatus.OK,
   })
   @ApiOperation({ summary: 'logout and clear tokens' })
+  @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Post('/logout')
