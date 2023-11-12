@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Applicant } from './models/applicant-role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +11,8 @@ import { ApplicantUpdateDto } from './dto/applicant-update.dto';
 import { IndividualUpdateDto } from './dto/individual-update.dto';
 import { LegalEntityUpdateDto } from './dto/legal-update.dto';
 import { ModeratorUpdateDto } from './dto/moderator-update.dto';
+import { ChangeRoleDto } from './dto/change-role.dto';
+import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 
 @Injectable()
 export class RolesService {
@@ -184,6 +186,31 @@ export class RolesService {
     };
 
     return await this.moderatorRepository.save(role);
+
+  }
+
+  async changeCurrentRole(changeRoleDto: ChangeRoleDto, userJwt: UserJwtDto) {
+
+    if(changeRoleDto.role == userJwt.role) {
+      throw new BadRequestException('The user already has this role');
+    }
+
+    if(changeRoleDto.role == 'moderator') {
+      throw new ForbiddenException('You don\'t have permissions for change role to moderator');
+    }
+
+    let user = await this.usersRepository.findOne({
+      where: {
+        uuid: userJwt.uuid,
+      },
+      relations: {
+        role: true,
+      },
+    });
+
+    user.role.current = changeRoleDto.role;
+
+    return await this.roleRepository.save(user.role);
 
   }
 

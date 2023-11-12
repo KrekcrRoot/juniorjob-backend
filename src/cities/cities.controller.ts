@@ -1,8 +1,12 @@
-import { Controller, Get, Post, HttpException, HttpStatus, Param } from '@nestjs/common';
+import { Controller, Get, Post, HttpException, HttpStatus, Param, UseGuards } from '@nestjs/common';
 import { CitiesService } from './cities.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { City } from './city.entity';
 import { isUUID } from 'class-validator';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
+import { UserRole } from 'src/roles/role.enum';
 
 @ApiTags('Cities')
 @Controller('cities')
@@ -24,7 +28,6 @@ export class CitiesController {
   @ApiResponse({
     status: 200,
     type: City,
-    isArray: false,
     description: 'Return city by name',
   })
   @ApiOperation({ summary: 'Return city by name' })
@@ -39,7 +42,6 @@ export class CitiesController {
   @ApiResponse({
     status: 200,
     type: City,
-    isArray: false,
     description: 'Return city by uuid',
   })
   @ApiOperation({ summary: 'Return city by uuid' })
@@ -51,6 +53,15 @@ export class CitiesController {
     return this.citiesService.getCityByUUID(params.uuid);
   }
 
+  @ApiResponse({
+    status: 200,
+    type: City,
+    description: 'Return city after store',
+  })
+  @ApiOperation({ summary: 'Store city' })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles(UserRole.Moderator)
   @Post('/store/:name')
   storeCity(@Param() params: any): Promise<City | null> {
     return this.citiesService.storeCity(params.name);

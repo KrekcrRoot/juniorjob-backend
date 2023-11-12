@@ -5,13 +5,8 @@ import { SignInAuthDto } from './dto/signin-auth.dto';
 import { Tokens } from './dto/tokens.dto';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
-import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 import { TokenUpdateReq } from './dto/token-update-req.dto';
-
-interface tokenRequest extends Request {
-  user: UserJwtDto;
-}
-
+import { TokenRequest } from 'src/users/dto/token-request';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -65,7 +60,7 @@ export class AuthController {
   @UseGuards(AccessTokenGuard)
   @HttpCode(HttpStatus.OK)
   @Post('/logout')
-  logout(@Req() req: tokenRequest) {
+  logout(@Req() req: TokenRequest) {
     if(!req.user['uuid']) throw new ForbiddenException('Access token is invalid');
     return this.authService.logout(req.user['uuid']);
   }

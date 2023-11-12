@@ -13,6 +13,12 @@ import { ApplicantUpdateDto } from './dto/applicant-update.dto';
 import { IndividualUpdateDto } from './dto/individual-update.dto';
 import { LegalEntityUpdateDto } from './dto/legal-update.dto';
 import { ModeratorUpdateDto } from './dto/moderator-update.dto';
+import { ChangeRoleDto } from './dto/change-role.dto';
+import { TokenRequest } from 'src/users/dto/token-request';
+import { ChangeRoleResponse } from './dto/change-role.response';
+import { RolesGuard } from './roles.guard';
+import { Roles } from './roles.decorator';
+import { UserRole } from './role.enum';
 
 // Interfaces
 
@@ -33,6 +39,9 @@ export class RolesController {
     description: 'Return role by user uuid',
   })
   @ApiOperation({ summary: 'Return role by user uuid' })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles(UserRole.Moderator)
   @Get('/user/:uuid')
   findUserRole(@Param() params: any) {
     return this.rolesService.findUserRole(params.uuid);
@@ -89,10 +98,26 @@ export class RolesController {
     type: Moderator,
     description: 'Return moderator by uuid',
   })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles(UserRole.Moderator)
   @ApiOperation({ summary: 'Return moderator by uuid' })
   @Get('/moderator/:uuid')
   findModerator(@Param() params: any) {
     return this.rolesService.findModerator(params.uuid);
+  }
+  
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: ChangeRoleResponse,
+    description: 'Response after changing role of user',
+  })
+  @ApiOperation({ summary: 'Change user role' })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Put('/change')
+  changeCurrent(@Body() changeRoleDto: ChangeRoleDto, @Req() tokenRequest: TokenRequest) {
+    return this.rolesService.changeCurrentRole(changeRoleDto, tokenRequest.user);
   }
 
   @ApiResponse({
@@ -101,6 +126,9 @@ export class RolesController {
     description: 'Return role by uuid',
   })
   @ApiOperation({ summary: 'Return role by uuid' })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @Roles(UserRole.Moderator)
   @Get(':uuid')
   findRole(@Param() params: any) {
     return this.rolesService.findRole(params.uuid);

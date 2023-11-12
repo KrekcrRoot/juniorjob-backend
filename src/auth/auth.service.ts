@@ -44,6 +44,7 @@ export class AuthService {
     const payload: UserJwtDto = {
       uuid: user.uuid,
       email: user.email,
+      role: user.role.current,
     }
 
     const tokens = await this.tokens(payload);
@@ -82,6 +83,7 @@ export class AuthService {
     const dto: UserJwtDto = {
       uuid: user.uuid,
       email: user.email,
+      role: user.role.current,
     }
 
     const tokens = await this.tokens(dto);
@@ -161,6 +163,7 @@ export class AuthService {
     const payload: UserJwtDto = {
       uuid: user.uuid,
       email: user.email,
+      role: user.role.current,
     }
 
     const tokens = await this.tokens(payload);
