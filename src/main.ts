@@ -28,6 +28,8 @@ async function bootstrap() {
 
   // Running app
 
+  app.enableCors({ credentials: true, origin: true });
+
   await app.listen(port).then(() => {
     logger.log({ level: `info`, message: `App started on port ${port}` });
   });
