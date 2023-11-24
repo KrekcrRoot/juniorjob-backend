@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, ForbiddenException, HttpCode, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, HttpCode, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { SignInAuthDto } from './dto/signin-auth.dto';
@@ -7,6 +7,7 @@ import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { TokenUpdateReq } from './dto/token-update-req.dto';
 import { TokenRequest } from 'src/users/dto/token-request';
+import responses from 'src/global/responses';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -61,7 +62,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('/logout')
   logout(@Req() req: TokenRequest) {
-    if(!req.user['uuid']) throw new ForbiddenException('Access token is invalid');
+    if(!req.user['uuid']) throw new ForbiddenException(responses.accessTokenInvalid);
     return this.authService.logout(req.user['uuid']);
   }
 }

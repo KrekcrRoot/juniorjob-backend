@@ -10,9 +10,10 @@ import { LegalEntity } from 'src/roles/models/legal-role.entity';
 import { Role } from 'src/roles/role.entity';
 import { Moderator } from 'src/roles/models/moderator-role.entity';
 import { UsersFactory } from './users.factory';
+import { RolesModule } from 'src/roles/roles.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Applicant, Individual, LegalEntity, Role, Moderator]), CitiesModule],
+  imports: [TypeOrmModule.forFeature([User, Applicant, Individual, LegalEntity, Role, Moderator]), CitiesModule, RolesModule],
   exports: [TypeOrmModule, UsersService, UsersFactory],
   controllers: [UsersController],
   providers: [UsersService, UsersFactory],

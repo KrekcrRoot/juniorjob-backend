@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Param, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
@@ -7,6 +7,7 @@ import { Roles } from 'src/roles/roles.decorator';
 import { UserRole } from 'src/roles/role.enum';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { TokenRequest } from './dto/token-request';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -67,5 +68,18 @@ export class UsersController {
   @Get(':uuid')
   findByUUID(@Param() params: any): Promise<User | null> {
     return this.usersService.findByUUID(params.uuid);
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: Boolean,
+    description: 'Change user password',
+  })
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Post('/changePassword')
+  changePassword(@Body() changePasswordDto: ChangePasswordDto, @Req() req: TokenRequest) {
+    return this.usersService.changePassword(changePasswordDto, req.user.uuid);
   }
 }

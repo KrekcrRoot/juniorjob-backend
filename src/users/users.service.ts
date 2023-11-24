@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,6 +10,8 @@ import { Individual } from 'src/roles/models/individual-role.entity';
 import { LegalEntity } from 'src/roles/models/legal-role.entity';
 import { Role } from 'src/roles/role.entity';
 import { Moderator } from 'src/roles/models/moderator-role.entity';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import responses from 'src/global/responses';
 
 @Injectable()
 export class UsersService {
@@ -92,9 +94,22 @@ export class UsersService {
   async update_refresh_token(user_uuid: string, hashed_token: string): Promise<User | null> {
     let user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
-    })
+    });
 
     user.hashedRefreshToken = hashed_token;
     return this.usersRepository.save(user);
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto, user_uuid: string) {
+    let user = await this.usersRepository.findOneBy({
+      uuid: user_uuid,
+    });
+
+    const result = await argon2.verify(user.password, changePasswordDto.previous_password);
+    
+    if(!result) throw new HttpException(responses.accessDenied, 401);
+
+    user.password = await argon2.hash(changePasswordDto.new_password);
+    return this.usersRepository.save(user); 
   }
 }

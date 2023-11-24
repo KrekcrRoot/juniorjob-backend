@@ -13,6 +13,7 @@ import { LegalEntityUpdateDto } from './dto/legal-update.dto';
 import { ModeratorUpdateDto } from './dto/moderator-update.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
+import responses from 'src/global/responses';
 
 @Injectable()
 export class RolesService {
@@ -37,7 +38,7 @@ export class RolesService {
       },
     });
 
-    if(!user) throw new BadRequestException('User not found');
+    if(!user) throw new BadRequestException(responses.notFound('User'));
 
     const role = await this.findRole(user.role.uuid);
 
@@ -69,7 +70,7 @@ export class RolesService {
       uuid: applicant_uuid,
     });
 
-    if(!applicant) throw new BadRequestException('Applicant not found');
+    if(!applicant) throw new BadRequestException(responses.notFound('Applicant'));
 
     return applicant;
 
@@ -81,7 +82,7 @@ export class RolesService {
       uuid: individual_uuid,
     });
 
-    if(!individual) throw new BadRequestException('Individual not found');
+    if(!individual) throw new BadRequestException(responses.notFound('Individual'));
 
     return individual;
 
@@ -93,7 +94,7 @@ export class RolesService {
       uuid: moderator_uuid,
     });
 
-    if(!moderator) throw new BadRequestException('Moderator not found');
+    if(!moderator) throw new BadRequestException(responses.notFound('Moderator'));
 
     return moderator;
 
@@ -105,7 +106,7 @@ export class RolesService {
       uuid: legal_entity_uuid,
     });
 
-    if(!legal_entity) throw new BadRequestException('Legal entity not found');
+    if(!legal_entity) throw new BadRequestException(responses.notFound('Legal entity'));
 
     return legal_entity;
 
@@ -121,7 +122,7 @@ export class RolesService {
     });
 
     if(!role) {
-      throw new BadRequestException('Role doesn\'t exist with this uuid');
+      throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
     role = {
@@ -139,7 +140,7 @@ export class RolesService {
     });
 
     if(!role) {
-      throw new BadRequestException('Role doesn\'t exist with this uuid');
+      throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
     role = {
@@ -158,7 +159,7 @@ export class RolesService {
     });
 
     if(!role) {
-      throw new BadRequestException('Role doesn\'t exist with this uuid');
+      throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
     role = {
@@ -177,7 +178,7 @@ export class RolesService {
     });
 
     if(!role) {
-      throw new BadRequestException('Role doesn\'t exist with this uuid');
+      throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
     role = {
@@ -192,11 +193,11 @@ export class RolesService {
   async changeCurrentRole(changeRoleDto: ChangeRoleDto, userJwt: UserJwtDto) {
 
     if(changeRoleDto.role == userJwt.role) {
-      throw new BadRequestException('The user already has this role');
+      throw new BadRequestException(responses.userAlreadyHaveRole);
     }
 
     if(changeRoleDto.role == 'moderator') {
-      throw new ForbiddenException('You don\'t have permissions for change role to moderator');
+      throw new ForbiddenException(responses.permission('change role to moderator'));
     }
 
     let user = await this.usersRepository.findOne({

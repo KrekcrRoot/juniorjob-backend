@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CoursesController } from './courses/courses.controller';
-import { RolesController } from './roles/roles.controller';
 import * as process from 'process';
 import { UsersModule } from './users/users.module';
 import { CitiesModule } from './cities/cities.module';
@@ -19,6 +18,9 @@ import { Applicant } from './roles/models/applicant-role.entity';
 import { Individual } from './roles/models/individual-role.entity';
 import { LegalEntity } from './roles/models/legal-role.entity';
 import { Moderator } from './roles/models/moderator-role.entity';
+import { VacanciesModule } from './vacancies/vacancies.module';
+import { Vacancy } from './vacancies/vacancy.entity';
+import { VacancyCategory } from './vacancies/vacancy-category.entity';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { Moderator } from './roles/models/moderator-role.entity';
         Individual,
         LegalEntity,
         Moderator,
+        Vacancy,
+        VacancyCategory,
       ],
       synchronize: true,
     }),
@@ -47,6 +51,7 @@ import { Moderator } from './roles/models/moderator-role.entity';
     CitiesModule,
     AuthModule,
     RolesModule,
+    VacanciesModule,
   ],
   controllers: [CoursesController, AuthController],
   providers: [AuthService],

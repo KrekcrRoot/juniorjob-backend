@@ -19,6 +19,7 @@ import { ChangeRoleResponse } from './dto/change-role.response';
 import { RolesGuard } from './roles.guard';
 import { Roles } from './roles.decorator';
 import { UserRole } from './role.enum';
+import responses from 'src/global/responses';
 
 // Interfaces
 
@@ -146,7 +147,7 @@ export class RolesController {
   updateApplicant(@Body() applicantDto: ApplicantUpdateDto, @Param() params: any) {
 
     if(!isUUID(params.uuid)) {
-      throw new BadRequestException('UUID not valid');
+      throw new BadRequestException(responses.uuidNotValid);
     }
 
     return this.rolesService.updateApplicant(applicantDto, params.uuid);
@@ -164,7 +165,7 @@ export class RolesController {
   updateIndividual(@Body() individualDto: IndividualUpdateDto, @Param() params: any) {
 
     if(!isUUID(params.uuid)) {
-      throw new BadRequestException('UUID not valid');
+      throw new BadRequestException(responses.uuidNotValid);
     }
 
     return this.rolesService.updateIndividual(individualDto, params.uuid);
@@ -183,7 +184,7 @@ export class RolesController {
   updateLegalEntity(@Body() legalEntityDto: LegalEntityUpdateDto, @Param() params: any) {
 
     if(!isUUID(params.uuid)) {
-      throw new BadRequestException('UUID not valid');
+      throw new BadRequestException(responses.uuidNotValid);
     }
 
     return this.rolesService.updateLegalEntity(legalEntityDto, params.uuid);
@@ -202,7 +203,7 @@ export class RolesController {
   updateModerator(@Body() moderatorDto: ModeratorUpdateDto, @Param() params: any) {
    
     if(!isUUID(params.uuid)) {
-      throw new BadRequestException('UUID not valid');
+      throw new BadRequestException(responses.uuidNotValid);
     }
 
     return this.rolesService.updateModerator(moderatorDto, params.uuid);

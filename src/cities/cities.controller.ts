@@ -7,6 +7,7 @@ import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { Roles } from 'src/roles/roles.decorator';
 import { UserRole } from 'src/roles/role.enum';
+import responses from 'src/global/responses';
 
 @ApiTags('Cities')
 @Controller('cities')
@@ -34,7 +35,7 @@ export class CitiesController {
   @Get('/name/:name')
   getByName(@Param() params: any): Promise<City | undefined> {
     if (params.name.trim() === '') {
-      throw new HttpException('Not valid city name', HttpStatus.BAD_REQUEST);
+      throw new HttpException(responses.notValid('city name'), HttpStatus.BAD_REQUEST);
     }
     return this.citiesService.getCityByName(params.name);
   }
@@ -48,7 +49,7 @@ export class CitiesController {
   @Get(':uuid')
   getById(@Param() params: any): Promise<City | undefined> {
     if (!isUUID(params.uuid)) {
-      throw new HttpException('Not valid uuid', HttpStatus.BAD_REQUEST);
+      throw new HttpException(responses.uuidNotValid, HttpStatus.BAD_REQUEST);
     }
     return this.citiesService.getCityByUUID(params.uuid);
   }

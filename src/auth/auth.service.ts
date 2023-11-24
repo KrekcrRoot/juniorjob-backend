@@ -16,6 +16,7 @@ import { Tokens } from './dto/tokens.dto';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 import { ConfigService } from '@nestjs/config';
 import { TokenUpdateReq } from './dto/token-update-req.dto';
+import responses from 'src/global/responses';
 
 @Injectable()
 export class AuthService {
@@ -27,18 +28,17 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
   
-
   async signinLocal(signInAuthDto: SignInAuthDto) {
     const user = await this.userService.findOne(signInAuthDto.email);
 
     if (!user) {
-      throw new BadRequestException('There is no user with this email');
+      throw new BadRequestException(responses.loginOrPasswordIncorrect);
     }
 
     const result = await argon2.verify(user.password, signInAuthDto.password);
 
     if (!result) {
-      throw new UnauthorizedException('Login or password is incorrect');
+      throw new UnauthorizedException(responses.loginOrPasswordIncorrect);
     }
 
     const payload: UserJwtDto = {
@@ -63,14 +63,14 @@ export class AuthService {
     const userExists = await this.userService.findOne(signUpAuthDto.email);
 
     if (userExists) {
-      throw new BadRequestException('User already exist');
+      throw new BadRequestException(responses.alreadyExist('User'));
     }
 
     // Check city exists
     const city = await this.citiesService.getCityByUUID(signUpAuthDto.city_uuid);
 
     if (!city) {
-      throw new BadRequestException('City uuid doesn\'t exist');
+      throw new BadRequestException(responses.doesntExist('City uuid'));
     }
 
     // Creating user
@@ -100,19 +100,19 @@ export class AuthService {
   async logout(user_uuid: string) {
     let user = await this.userService.findByUUID(user_uuid);
 
-    if(user.hashedRefreshToken == null) throw new HttpException('User is not logged', HttpStatus.BAD_REQUEST);
+    if(user.hashedRefreshToken == null) throw new HttpException(responses.userIsNotLogged, HttpStatus.BAD_REQUEST);
 
     user.hashedRefreshToken = null;
     const saved_user = await this.userService.saveUser(user);
 
     if(saved_user) {
       return {
-        message: 'Logout success',
+        message: responses.logoutSuccess,
         statusCode: 200,
       }
     } else {
       return {
-        message: 'Logout unsuccessed',
+        message: responses.logoutUnsuccessed,
         statusCode: 500,
       }
     }
@@ -146,19 +146,19 @@ export class AuthService {
     const expired_access_token = this.jwtService.decode(tokenUpdateReq.access_token) as UserJwtDto;
     let user = await this.userService.findByUUID(expired_access_token.uuid);
     
-    if(!user || !user.hashedRefreshToken) throw new ForbiddenException('Access denied');
+    if(!user || !user.hashedRefreshToken) throw new ForbiddenException(responses.accessDenied);
 
     try {
       this.jwtService.verify(tokenUpdateReq.refresh_token, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
       })
     } catch(error) {
-      throw new ForbiddenException('Refresh token expired or invalid');
+      throw new ForbiddenException(responses.refreshTokenExpiredOrInvalid);
     }
 
     const token_verify = await argon2.verify(user.hashedRefreshToken, tokenUpdateReq.refresh_token);
 
-    if(!token_verify) throw new ForbiddenException('Access denied');
+    if(!token_verify) throw new ForbiddenException(responses.accessDenied);
 
     const payload: UserJwtDto = {
       uuid: user.uuid,
