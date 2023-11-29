@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
@@ -82,4 +82,13 @@ export class UsersController {
   changePassword(@Body() changePasswordDto: ChangePasswordDto, @Req() req: TokenRequest) {
     return this.usersService.changePassword(changePasswordDto, req.user.uuid);
   }
+
+  @Post('/ban')
+  ban() {}
+
+  @Post('/unban')
+  unban() {}
+
+  @Delete('/delete')
+  delete() {}
 }

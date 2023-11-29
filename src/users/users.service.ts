@@ -26,11 +26,19 @@ export class UsersService {
   ) {}
 
   async getAllUsers(): Promise<User[]> {
-    return await this.usersRepository.find({ relations: { city: true, role: true } });
+    return await this.usersRepository.find({
+      where: {
+        deleted: false,
+      },
+      relations: { 
+        city: true, 
+        role: true 
+      }, 
+    });
   }
 
   async findOne(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: {
         email: email,
       },
@@ -39,10 +47,13 @@ export class UsersService {
         role: true,
       }
     });
+
+    if(user.deleted) return null;
+    return user;
   }
 
   async findByUUID(user_uuid: string): Promise<User | null> {
-    return this.usersRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: {
         uuid: user_uuid,
       },
@@ -51,6 +62,9 @@ export class UsersService {
         role: true,
       }
     });
+
+    if(user.deleted) return null;
+    return user;
   }
 
   async createUser(dto: CreateUserDto): Promise<User> {

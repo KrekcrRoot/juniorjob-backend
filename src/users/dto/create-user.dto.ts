@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from 'class-validator';
 import { City } from '../../cities/city.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -15,6 +15,7 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   @MinLength(5)
+  @MaxLength(1024)
   @ApiProperty({
     example: '64dfb04e',
     description: 'Password (min 5 length)',
