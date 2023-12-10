@@ -1,6 +1,20 @@
-import { Body, Controller, ForbiddenException, HttpCode, HttpException, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { SignInAuthDto } from './dto/signin-auth.dto';
 import { Tokens } from './dto/tokens.dto';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
@@ -43,7 +57,7 @@ export class AuthController {
   @ApiResponse({
     status: HttpStatus.OK,
     type: Tokens,
-    description: 'JWT tokens after refreshing'
+    description: 'JWT tokens after refreshing',
   })
   @ApiBearerAuth()
   @ApiOperation({ summary: 'refresh tokens' })
@@ -62,7 +76,8 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('/logout')
   logout(@Req() req: TokenRequest) {
-    if(!req.user['uuid']) throw new ForbiddenException(responses.accessTokenInvalid);
+    if (!req.user['uuid'])
+      throw new ForbiddenException(responses.accessTokenInvalid);
     return this.authService.logout(req.user['uuid']);
   }
 }

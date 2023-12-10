@@ -11,6 +11,7 @@ import {
 import { City } from '../cities/city.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'src/roles/role.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity('Users')
 export class User {
@@ -29,7 +30,8 @@ export class User {
   email: string;
 
   @ApiProperty({
-    example: '$argon2i$v=19$m=16,t=2,p=1$MTIzNDIzNDU2NDU2NDU2$Lxgzhxe4rT83ET0XMJProQ',
+    example:
+      '$argon2i$v=19$m=16,t=2,p=1$MTIzNDIzNDU2NDU2NDU2$Lxgzhxe4rT83ET0XMJProQ',
     description: 'Hash password for user',
   })
   @Column()
@@ -40,7 +42,7 @@ export class User {
     description: 'Photo url for user',
   })
   @Column({ default: 'image.png' })
-  photo: string;
+  image: string;
 
   @ApiProperty({
     example: City,
@@ -94,7 +96,8 @@ export class User {
   deleted: boolean;
 
   @ApiProperty({
-    example: '$argon2i$v=19$m=16,t=2,p=1$MTIzNDIzNDU2NDU2NDU2$Lxgzhxe4rT83ET0XMJProQ',
+    example:
+      '$argon2i$v=19$m=16,t=2,p=1$MTIzNDIzNDU2NDU2NDU2$Lxgzhxe4rT83ET0XMJProQ',
     description: 'Hashed refresh token',
   })
   @Column({ nullable: true })

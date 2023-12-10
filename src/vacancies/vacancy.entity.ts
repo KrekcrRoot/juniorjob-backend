@@ -56,6 +56,13 @@ export class Vacancy {
     description: string;
 
     @ApiProperty({
+        example: '/storage/vacancies/12345.png',
+        description: 'Image url',
+    })
+    @Column({ default: 'image.png' })
+    image: string;
+
+    @ApiProperty({
         example: true,
         description: 'Is this vacancy requires experience',
     })

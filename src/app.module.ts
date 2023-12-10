@@ -21,6 +21,7 @@ import { Moderator } from './roles/models/moderator-role.entity';
 import { VacanciesModule } from './vacancies/vacancies.module';
 import { Vacancy } from './vacancies/vacancy.entity';
 import { VacancyCategory } from './vacancies/vacancy-category.entity';
+import { StorageController } from './storage/storage.controller';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { VacancyCategory } from './vacancies/vacancy-category.entity';
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
       entities: [
-        User, 
+        User,
         City,
         Role,
         Applicant,
@@ -53,7 +54,7 @@ import { VacancyCategory } from './vacancies/vacancy-category.entity';
     RolesModule,
     VacanciesModule,
   ],
-  controllers: [CoursesController, AuthController],
+  controllers: [CoursesController, AuthController, StorageController],
   providers: [AuthService],
 })
 export class AppModule {}

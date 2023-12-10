@@ -23,6 +23,9 @@ export class VacanciesService {
             where: {
                 uuid: uuid,
             },
+            relations: {
+                employer: true,
+            }
         })
     }
 
@@ -36,19 +39,22 @@ export class VacanciesService {
             throw new BadRequestException(responses.doesntExistUUID('Category of vacancy'))
         }
 
-        return this.vacancyRepository.create({
+        const vacancy = this.vacancyRepository.create({
             employer: user,
             category: category,
             ...createVacancyDto,
         });
 
+        return this.vacancyRepository.save(vacancy);
+
     }
 
     async getByEmployer(user: User): Promise<Array<Vacancy> | null> {
-        
         return this.vacancyRepository.find({
             where: {
-                employer: user,
+                employer: {
+                    uuid: user.uuid,
+                },
                 deleted: false,
             },
             relations: {
@@ -60,14 +66,17 @@ export class VacanciesService {
 
     async all(): Promise<Array<Vacancy> | null> {
 
-        return this.vacancyRepository.find({
+        let vacancy = await this.vacancyRepository.find({
             where: {
                 deleted: false,
             },
             relations: {
                 category: true,
+                employer: true,
             }
         })
+
+        return vacancy;
 
     }
 
@@ -119,6 +128,24 @@ export class VacanciesService {
 
     }
 
+    async editImage(vacancyUUID: string, imageUrl: string) {
+
+        let vacancy = await this.vacancyRepository.findOne({
+            where: {
+                uuid: vacancyUUID,
+                deleted: false,
+                banned: false,
+            },
+        })
+
+        if(!vacancy) throw new BadRequestException(responses.doesntExistUUID('Vacancy'));
+
+        vacancy.image = imageUrl;
+
+        return this.vacancyRepository.save(vacancy);
+
+    }
+
     async edit(editVacancyDto: EditVacancyDto, user: UserJwtDto) {
 
         let vacancy = await this.vacancyRepository.findOne({
@@ -145,6 +172,7 @@ export class VacanciesService {
             uuid: vacancy.uuid,
             employer: vacancy.employer,
             category: category,
+            image: vacancy.image,
             ...editVacancyDto,
             deleted: vacancy.deleted,
             banned: vacancy.banned,

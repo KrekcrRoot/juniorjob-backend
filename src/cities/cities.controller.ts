@@ -1,6 +1,19 @@
-import { Controller, Get, Post, HttpException, HttpStatus, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  HttpException,
+  HttpStatus,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { CitiesService } from './cities.service';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { City } from './city.entity';
 import { isUUID } from 'class-validator';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
@@ -35,7 +48,10 @@ export class CitiesController {
   @Get('/name/:name')
   getByName(@Param() params: any): Promise<City | undefined> {
     if (params.name.trim() === '') {
-      throw new HttpException(responses.notValid('city name'), HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        responses.notValid('city name'),
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return this.citiesService.getCityByName(params.name);
   }

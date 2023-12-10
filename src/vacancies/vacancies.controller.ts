@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Post, Get, HttpStatus, Param, UseGuards, Body, Req, Delete, Put } from '@nestjs/common';
+import { BadRequestException, UseInterceptors, Controller, Post, Get, HttpStatus, Param, UseGuards, Body, Req, Delete, Put, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, ForbiddenException } from '@nestjs/common';
 import { VacanciesService } from './vacancies.service';
 import { Vacancy } from './vacancy.entity';
 import { isUUID } from 'class-validator';
@@ -12,13 +12,21 @@ import { TokenRequest } from 'src/users/dto/token-request';
 import { UsersService } from 'src/users/users.service';
 import { UUIDVacancyDto } from './dto/uuid-vacancy.dto';
 import { EditVacancyDto } from './dto/edit-vacancy.dto';
-import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileTypeValidationPipe } from './vacancies.image.pipe';
+import constants from 'src/global/constants';
+import responses from 'src/global/responses';
+import * as fs from 'fs';
+import { join } from 'path';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @ApiTags('Vacancies')
 @Controller('vacancies')
 export class VacanciesController {
 
-    constructor(private vacanciesService: VacanciesService, private usersSerivice: UsersService) {}
+    constructor(private vacanciesService: VacanciesService, private usersSerivice: UsersService, 
+        @InjectRepository(Vacancy) private vacancyRepository: Repository<Vacancy>,) {}
 
     // Post
 
@@ -67,6 +75,31 @@ export class VacanciesController {
     @Post('/unban')
     unban(@Body() banVacancyDto: UUIDVacancyDto) {
         return this.vacanciesService.unban(banVacancyDto.vacancy_uuid);
+    }
+
+    @UseGuards(AccessTokenGuard, RolesGuard)
+    @Roles(UserRole.Individual, UserRole.LegalEntity, UserRole.Moderator)
+    @Post('/uploadImage')
+    @UseInterceptors(FileInterceptor('image'))
+    async uploadFile(@Body() req: UUIDVacancyDto, @Req() auth: TokenRequest, @UploadedFile(new FileTypeValidationPipe()) file: Express.Multer.File) {
+
+        const vacancy = await this.vacanciesService.findByUUID(req.vacancy_uuid);
+
+        if(!vacancy) {
+            throw new BadRequestException(responses.doesntExistUUID('Vacancy'));
+        }
+
+        if(auth.user.role != UserRole.Moderator && vacancy.employer.uuid != auth.user.uuid) {
+            throw new ForbiddenException(responses.accessDenied);
+        }
+
+        const filearr = file.originalname.split('.');
+        const type = filearr[filearr.length - 1];
+
+        const fileName = constants.vacanciesFolder + Date.now() + '.' + type;
+        fs.writeFileSync(__dirname + '/../..' + fileName, file.buffer);
+
+        return this.vacanciesService.editImage(req.vacancy_uuid, fileName);
     }
 
     // Put

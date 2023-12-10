@@ -1,4 +1,4 @@
-import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -17,12 +17,15 @@ import responses from 'src/global/responses';
 export class UsersService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    @InjectRepository(Applicant) private applicantRepository: Repository<Applicant>,
-    @InjectRepository(Individual) private individualRepository: Repository<Individual>,
-    @InjectRepository(LegalEntity) private legalEntityRepository: Repository<LegalEntity>,
-    @InjectRepository(Moderator) private moderatorRepository: Repository<Moderator>,
+    @InjectRepository(Applicant)
+    private applicantRepository: Repository<Applicant>,
+    @InjectRepository(Individual)
+    private individualRepository: Repository<Individual>,
+    @InjectRepository(LegalEntity)
+    private legalEntityRepository: Repository<LegalEntity>,
+    @InjectRepository(Moderator)
+    private moderatorRepository: Repository<Moderator>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
-    private citiesService: CitiesService,
   ) {}
 
   async getAllUsers(): Promise<User[]> {
@@ -30,10 +33,10 @@ export class UsersService {
       where: {
         deleted: false,
       },
-      relations: { 
-        city: true, 
-        role: true 
-      }, 
+      relations: {
+        city: true,
+        role: true,
+      },
     });
   }
 
@@ -45,10 +48,12 @@ export class UsersService {
       relations: {
         city: true,
         role: true,
-      }
+      },
     });
+    
+    if (!user) return null;
 
-    if(user.deleted) return null;
+    if (user.deleted) return null;
     return user;
   }
 
@@ -60,10 +65,10 @@ export class UsersService {
       relations: {
         city: true,
         role: true,
-      }
+      },
     });
 
-    if(user.deleted) return null;
+    if (user.deleted) return null;
     return user;
   }
 
@@ -91,7 +96,7 @@ export class UsersService {
       individual: individual,
       legal_entity: legal_entity,
       moderator: moderator,
-    })
+    });
 
     await this.roleRepository.save(user_role);
 
@@ -105,8 +110,11 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async update_refresh_token(user_uuid: string, hashed_token: string): Promise<User | null> {
-    let user = await this.usersRepository.findOneBy({
+  async update_refresh_token(
+    user_uuid: string,
+    hashed_token: string,
+  ): Promise<User | null> {
+    const user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
     });
 
@@ -114,16 +122,90 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async changePassword(changePasswordDto: ChangePasswordDto, user_uuid: string) {
-    let user = await this.usersRepository.findOneBy({
+  async changePassword(
+    changePasswordDto: ChangePasswordDto,
+    user_uuid: string,
+  ) {
+    const user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
     });
 
-    const result = await argon2.verify(user.password, changePasswordDto.previous_password);
-    
-    if(!result) throw new HttpException(responses.accessDenied, 401);
+    if(!user) {
+      throw new BadRequestException(responses.doesntExistUUID('User'));
+    }
+
+    const result = await argon2.verify(
+      user.password,
+      changePasswordDto.previous_password,
+    );
+
+    if (!result) throw new HttpException(responses.accessDenied, 401);
 
     user.password = await argon2.hash(changePasswordDto.new_password);
-    return this.usersRepository.save(user); 
+    return this.usersRepository.save(user);
+  }
+
+  async ban(user_uuid: string) {
+
+    const user = await this.usersRepository.findOneBy({
+      uuid: user_uuid,
+    });
+
+    if(!user) {
+      throw new BadRequestException(responses.doesntExistUUID('User'));
+    }
+
+    user.banned = true;
+
+    return this.usersRepository.save(user);
+
+  }
+
+  async unban(user_uuid: string) {
+
+    const user = await this.usersRepository.findOneBy({
+      uuid: user_uuid,
+    });
+
+    if(!user) {
+      throw new BadRequestException(responses.doesntExistUUID('User'));
+    }
+
+    user.banned = false;
+
+    return this.usersRepository.save(user);
+
+  }
+
+  async delete(user_uuid: string) {
+
+    const user = await this.usersRepository.findOneBy({
+      uuid: user_uuid,
+    });
+
+    if(!user) {
+      throw new BadRequestException(responses.doesntExistUUID('User'));
+    }
+
+    user.deleted = true;
+
+    return this.usersRepository.save(user);
+
+  }
+
+  async updateImage(user_uuid: string, image: string) {
+   
+    const user = await this.usersRepository.findOneBy({
+      uuid: user_uuid,
+    });
+
+    if(!user) {
+      throw new BadRequestException(responses.doesntExistUUID('User'));
+    }
+
+    user.image = image;
+
+    return this.usersRepository.save(user);
+    
   }
 }

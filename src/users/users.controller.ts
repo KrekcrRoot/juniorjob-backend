@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
@@ -8,6 +8,11 @@ import { UserRole } from 'src/roles/role.enum';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { TokenRequest } from './dto/token-request';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UserUUID } from './dto/user-uuid.dto';
+import { FileTypeValidationPipe } from 'src/vacancies/vacancies.image.pipe';
+import constants from 'src/global/constants';
+import * as fs from 'fs';
 
 @ApiTags('Users')
 @Controller('users')
@@ -35,6 +40,7 @@ export class UsersController {
     isArray: true,
     description: 'Find user by access token',
   })
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Find user by access token' })
   @UseGuards(AccessTokenGuard)
   @Get('/my')
@@ -49,8 +55,7 @@ export class UsersController {
   })
   @ApiOperation({ summary: 'Find user by email' })
   @ApiBearerAuth()
-  @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(UserRole.Moderator)
+  @UseGuards(AccessTokenGuard)
   @Get('email/:email')
   findByEmail(@Param() params: any): Promise<User | null> {
     return this.usersService.findOne(params.email);
@@ -63,11 +68,26 @@ export class UsersController {
   })
   @ApiOperation({ summary: 'Find user by UUID' })
   @ApiBearerAuth()
-  @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(UserRole.Moderator)
+  @UseGuards(AccessTokenGuard)
   @Get(':uuid')
   findByUUID(@Param() params: any): Promise<User | null> {
     return this.usersService.findByUUID(params.uuid);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiBearerAuth()
+  @Post('/uploadImage')
+  uploadImage(@Req() auth: TokenRequest, @UploadedFile(new FileTypeValidationPipe()) file: Express.Multer.File) {
+
+    const filearr = file.originalname.split('.');
+    const type = filearr[filearr.length - 1];
+
+    const fileName = constants.usersFolder + Date.now() + '.' + type;
+    fs.writeFileSync(__dirname + '/../..' + fileName, file.buffer);
+
+    return this.usersService.updateImage(auth.user.uuid, fileName);
+
   }
 
   @ApiResponse({
@@ -83,12 +103,42 @@ export class UsersController {
     return this.usersService.changePassword(changePasswordDto, req.user.uuid);
   }
 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Ban user',
+  })
+  @ApiOperation({ summary: 'Ban user (Moderator only)' })
   @Post('/ban')
-  ban() {}
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.Moderator)
+  ban(@Body() userUUID: UserUUID) {
+    return this.usersService.ban(userUUID.uuid);
+  } 
 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Ban user',
+  })
+  @ApiOperation({ summary: 'Ban user (Moderator only)' })
   @Post('/unban')
-  unban() {}
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.Moderator)
+  unban(@Body() userUUID: UserUUID) {
+    return this.usersService.unban(userUUID.uuid);
+  }
 
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Ban user',
+  })
+  @ApiOperation({ summary: 'Ban user (Moderator only)' })
   @Delete('/delete')
-  delete() {}
+  @UseGuards(AccessTokenGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles(UserRole.Moderator)
+  delete(@Body() userUUID: UserUUID) {
+    this.usersService.delete(userUUID.uuid);
+  }
 }
