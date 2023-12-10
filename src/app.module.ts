@@ -22,6 +22,8 @@ import { VacanciesModule } from './vacancies/vacancies.module';
 import { Vacancy } from './vacancies/vacancy.entity';
 import { VacancyCategory } from './vacancies/vacancy-category.entity';
 import { StorageController } from './storage/storage.controller';
+import { ServerController } from './server/server.controller';
+import { ServerModule } from './server/server.module';
 
 @Module({
   imports: [
@@ -53,6 +55,7 @@ import { StorageController } from './storage/storage.controller';
     AuthModule,
     RolesModule,
     VacanciesModule,
+    ServerModule,
   ],
   controllers: [CoursesController, AuthController, StorageController],
   providers: [AuthService],
