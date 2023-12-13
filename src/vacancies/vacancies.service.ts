@@ -9,6 +9,8 @@ import { Vacancy } from './vacancy.entity';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 import { UserRole } from 'src/roles/role.enum';
 import { EditVacancyDto } from './dto/edit-vacancy.dto';
+import { AllFilterDto } from 'src/users/dto/all-users-filter.dto';
+import { FilterProperties } from 'src/users/users.service';
 
 @Injectable()
 export class VacanciesService {
@@ -22,9 +24,11 @@ export class VacanciesService {
         return this.vacancyRepository.findOne({
             where: {
                 uuid: uuid,
+                deleted: false,
             },
             relations: {
                 employer: true,
+                category: true,
             }
         })
     }
@@ -64,9 +68,16 @@ export class VacanciesService {
 
     }
 
-    async all(): Promise<Array<Vacancy> | null> {
+    async all(filters: AllFilterDto): Promise<Array<Vacancy> | null> {
 
-        let vacancy = await this.vacancyRepository.find({
+        let page = 0, row = 30;
+
+        if(filters.page !== undefined) page = filters.page;
+        if(filters.row !== undefined) row = filters.row;
+
+        let query: FilterProperties = {
+            skip: page * row,
+            take: row,
             where: {
                 deleted: false,
             },
@@ -74,7 +85,18 @@ export class VacanciesService {
                 category: true,
                 employer: true,
             }
-        })
+        };
+
+        if(filters.sortByCreatedAt !== undefined) {
+            query.order = {};
+            query.order.created_at = filters.sortByCreatedAt == 'Up' ? 'ASC' : 'DESC';
+          }
+          if(filters.sortByUpdatedAt !== undefined) {
+            query.order == undefined ? query.order = {} : false;
+            query.order.updated_at = filters.sortByUpdatedAt == 'Up' ? 'ASC' : 'DESC';
+          }
+
+        let vacancy = await this.vacancyRepository.find(query);
 
         return vacancy;
 
@@ -136,6 +158,10 @@ export class VacanciesService {
                 deleted: false,
                 banned: false,
             },
+            relations: {
+                category: true,
+                employer: true,
+            }
         })
 
         if(!vacancy) throw new BadRequestException(responses.doesntExistUUID('Vacancy'));
@@ -176,6 +202,8 @@ export class VacanciesService {
             ...editVacancyDto,
             deleted: vacancy.deleted,
             banned: vacancy.banned,
+            created_at: vacancy.created_at,
+            updated_at: new Date(),
         };
 
         return this.vacancyRepository.save(vacancy);

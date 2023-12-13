@@ -2,10 +2,9 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { City } from './city.entity';
-import logger from '../logger';
 
 @Injectable()
-export class CitiesService implements OnModuleInit {
+export class CitiesService {
   constructor(
     @InjectRepository(City) private citiesRepository: Repository<City>,
   ) {}
@@ -28,9 +27,5 @@ export class CitiesService implements OnModuleInit {
     })
 
     return this.citiesRepository.save(city);
-  }
-
-  onModuleInit(): void {
-    logger.log({ level: 'info', message: 'Cities init' });
   }
 }

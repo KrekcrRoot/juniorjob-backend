@@ -13,6 +13,7 @@ import { UserUUID } from './dto/user-uuid.dto';
 import { FileTypeValidationPipe } from 'src/vacancies/vacancies.image.pipe';
 import constants from 'src/global/constants';
 import * as fs from 'fs';
+import { AllFilterDto } from './dto/all-users-filter.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -27,11 +28,11 @@ export class UsersController {
   })
   @ApiOperation({ summary: 'Find all users' })
   @ApiBearerAuth('access token')
-  @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(UserRole.Moderator)
+  @UseGuards(AccessTokenGuard)
   @Get()
-  getAll(@Req() req: TokenRequest): Promise<User[]> {
-    return this.usersService.getAllUsers();
+  getAll(@Body() filters: AllFilterDto) {
+    console.log(filters);
+    return this.usersService.getAllUsers(filters);
   }
 
   @ApiResponse({

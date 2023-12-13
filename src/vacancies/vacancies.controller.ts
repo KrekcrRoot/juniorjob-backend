@@ -20,13 +20,13 @@ import * as fs from 'fs';
 import { join } from 'path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AllFilterDto } from 'src/users/dto/all-users-filter.dto';
 
 @ApiTags('Vacancies')
 @Controller('vacancies')
 export class VacanciesController {
 
-    constructor(private vacanciesService: VacanciesService, private usersSerivice: UsersService, 
-        @InjectRepository(Vacancy) private vacancyRepository: Repository<Vacancy>,) {}
+    constructor(private vacanciesService: VacanciesService, private usersSerivice: UsersService) {}
 
     // Post
 
@@ -148,8 +148,8 @@ export class VacanciesController {
     })
     @ApiOperation({ summary: 'Response all vacancies' })
     @Get('/all')
-    getAll() {
-        return this.vacanciesService.all();
+    getAll(@Body() filters: AllFilterDto) {
+        return this.vacanciesService.all(filters);
     }
 
     @ApiResponse({

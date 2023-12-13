@@ -61,4 +61,29 @@ export class StorageController {
     return new StreamableFile(file);
   }
 
+  @Get('/vacanciesCategory/:filename')
+  getVacancyCategoryImage(@Param() params: any, @Res({ passthrough: true }) res: Response) {
+    const categoryPath = join(process.cwd(), constants.vacanciesCategoryFolder);
+
+    if(!fs.existsSync(join(categoryPath, params.filename))) {
+      throw new BadRequestException('File not exist');
+    }
+
+    const file = fs.createReadStream(join(categoryPath, params.filename));
+  
+    const file_params = params.filename.split('.')
+
+    if(file_params[file_params.length - 1] == 'png') {
+      res.set({
+        'Content-Type': 'image/png',
+      })
+    }else{
+      res.set({
+        'Content-Type': 'image/jpeg',
+      })
+    }
+
+    return new StreamableFile(file);
+  }
+
 }

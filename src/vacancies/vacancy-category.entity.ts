@@ -18,4 +18,11 @@ export class VacancyCategory {
     @Column()
     title: string;
 
+    @ApiProperty({
+        example: '/url/to/img',
+        description: 'Vacancy category url',
+    })
+    @Column({ default: 'image.png' })
+    image: string;
+
 }

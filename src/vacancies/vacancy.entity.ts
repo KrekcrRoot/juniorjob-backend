@@ -1,5 +1,5 @@
 import { User } from "src/users/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { VacancyCategory } from "./vacancy-category.entity";
 import { ApiProperty } from "@nestjs/swagger";
 
@@ -89,5 +89,26 @@ export class Vacancy {
     })
     @Column({ default: false })
     banned: boolean;
+
+    @ApiProperty({
+        example: new Date(),
+        description: 'Timestamp when user created',
+    })
+    @CreateDateColumn({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP(6)',
+    })
+    created_at: Date;
+
+    @ApiProperty({
+        example: new Date(),
+        description: 'Timestamp when user updated',
+    })
+    @UpdateDateColumn({
+        type: 'timestamp',
+        default: () => 'CURRENT_TIMESTAMP(6)',
+        onUpdate: 'CURRENT_TIMESTAMP(6)',
+    })
+    updated_at: Date;
 
 }

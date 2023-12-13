@@ -3,7 +3,6 @@ import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CitiesService } from '../cities/cities.service';
 import * as argon2 from 'argon2';
 import { Applicant } from 'src/roles/models/applicant-role.entity';
 import { Individual } from 'src/roles/models/individual-role.entity';
@@ -12,6 +11,11 @@ import { Role } from 'src/roles/role.entity';
 import { Moderator } from 'src/roles/models/moderator-role.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import responses from 'src/global/responses';
+import { AllFilterDto } from './dto/all-users-filter.dto';
+
+export interface FilterProperties {
+  [key: string]: any
+}
 
 @Injectable()
 export class UsersService {
@@ -28,8 +32,30 @@ export class UsersService {
     @InjectRepository(Role) private roleRepository: Repository<Role>,
   ) {}
 
-  async getAllUsers(): Promise<User[]> {
-    return await this.usersRepository.find({
+  async getAllUsers(filters: AllFilterDto) {
+    let page = 0, row = 30;
+
+    if(filters.page !== undefined) page = filters.page;
+    if(filters.row !== undefined) row = filters.row;
+
+    if(filters.byDate !== undefined) {
+      return await this.usersRepository.find({
+        skip: page * row,
+        take: row,
+        where: {
+          created_at: filters.byDate,
+          deleted: false,
+        },
+        relations: {
+          city: true,
+          role: true,
+        }
+      });
+    }
+
+    let query: FilterProperties = {
+      skip: page * row,
+      take: row,
       where: {
         deleted: false,
       },
@@ -37,7 +63,18 @@ export class UsersService {
         city: true,
         role: true,
       },
-    });
+    };
+
+    if(filters.sortByCreatedAt !== undefined) {
+      query.order = {};
+      query.order.created_at = filters.sortByCreatedAt == 'Up' ? 'ASC' : 'DESC';
+    }
+    if(filters.sortByUpdatedAt !== undefined) {
+      query.order == undefined ? query.order = {} : false;
+      query.order.updated_at = filters.sortByUpdatedAt == 'Up' ? 'ASC' : 'DESC';
+    }
+
+    return await this.usersRepository.find(query);
   }
 
   async findOne(email: string): Promise<User | null> {

@@ -16,7 +16,7 @@ export class ServerController {
   check() {
     return this.health.check([
       () => this.http.pingCheck('internet', 'https://8.8.8.8'),
-      () => this.http.pingCheck('this', 'https://api.junior-job.ru/ping'),
+      () => this.http.pingCheck('api', 'https://api.junior-job.ru/server/ping'),
       () => this.http.pingCheck('frontend', 'https://junior-job.ru'),
     ]);
   }
@@ -27,8 +27,13 @@ export class ServerController {
   }
 
   @Get('/ping')
-  ping() {
-    return 'pong';
+  async ping() {
+    const response = {
+      response: 'pong',
+      message: 'evetything is fine',
+    };
+
+    return response;
   }
 
 }
