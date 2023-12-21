@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
@@ -14,6 +14,7 @@ import { FileTypeValidationPipe } from 'src/vacancies/vacancies.image.pipe';
 import constants from 'src/global/constants';
 import * as fs from 'fs';
 import { AllFilterDto } from './dto/all-users-filter.dto';
+import { query } from 'express';
 
 @ApiTags('Users')
 @Controller('users')
@@ -30,9 +31,8 @@ export class UsersController {
   @ApiBearerAuth('access token')
   @UseGuards(AccessTokenGuard)
   @Get()
-  getAll(@Body() filters: AllFilterDto) {
-    console.log(filters);
-    return this.usersService.getAllUsers(filters);
+  getAll(@Query() query: AllFilterDto) {
+    return this.usersService.getAllUsers(query);
   }
 
   @ApiResponse({

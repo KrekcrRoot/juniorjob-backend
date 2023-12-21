@@ -13,7 +13,9 @@ export class StorageController {
   @Get('/vacancies/:filename')
   getVacancyImage(@Param() params: any, @Res({ passthrough: true }) res: Response) {
 
-    const vacancyPath = join(process.cwd(), constants.vacanciesFolder);
+    const process_cwd = join(process.cwd(), '/..');
+    const categoryPath = join(process_cwd, constants.vacanciesCategoryFolder);
+    const vacancyPath = join(process_cwd, constants.vacanciesFolder);
 
     if(!fs.existsSync(join(vacancyPath, params.filename))) {
       throw new BadRequestException('File not exist');
@@ -38,7 +40,9 @@ export class StorageController {
 
   @Get('/users/:filename')
   getUsersImage(@Param() params: any, @Res({ passthrough: true }) res: Response) {
-    const usersPath = join(process.cwd(), constants.usersFolder);
+    const process_cwd = join(process.cwd(), '/..');
+    const categoryPath = join(process_cwd, constants.vacanciesCategoryFolder);
+    const usersPath = join(process_cwd, constants.usersFolder);
 
     if(!fs.existsSync(join(usersPath, params.filename))) {
       throw new BadRequestException('File not exist');
@@ -63,7 +67,9 @@ export class StorageController {
 
   @Get('/vacanciesCategory/:filename')
   getVacancyCategoryImage(@Param() params: any, @Res({ passthrough: true }) res: Response) {
-    const categoryPath = join(process.cwd(), constants.vacanciesCategoryFolder);
+    
+    const process_cwd = join(process.cwd(), '/..');
+    const categoryPath = join(process_cwd, constants.vacanciesCategoryFolder);
 
     if(!fs.existsSync(join(categoryPath, params.filename))) {
       throw new BadRequestException('File not exist');
@@ -82,6 +88,8 @@ export class StorageController {
         'Content-Type': 'image/jpeg',
       })
     }
+
+    console.log(file);
 
     return new StreamableFile(file);
   }

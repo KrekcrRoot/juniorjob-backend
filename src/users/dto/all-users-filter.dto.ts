@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsEnum, IsNumber, IsOptional } from "class-validator";
+import { Type } from "class-transformer";
+import { IsDateString, IsEnum, IsInt, IsNumber, IsOptional } from "class-validator";
 
 export enum SortDirection {
   UP = 'Up',
@@ -13,17 +14,19 @@ export class AllFilterDto {
     example: '0',
     description: 'Page number'
   })
-  @IsOptional()
+  @Type(() => Number)
   @IsNumber()
-  page: number | null;
+  @IsOptional()
+  page: number;
 
   @ApiProperty({
     required: false,
     example: '30',
     description: 'Lists in one page'
   })
-  @IsOptional()
+  @Type(() => Number)
   @IsNumber()
+  @IsOptional()
   row: number | null;
 
   @ApiProperty({

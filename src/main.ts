@@ -24,7 +24,9 @@ async function bootstrap() {
 
   // Validator
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+  }));
 
   // Running app
 

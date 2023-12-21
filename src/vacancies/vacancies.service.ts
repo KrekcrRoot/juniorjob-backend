@@ -27,7 +27,14 @@ export class VacanciesService {
                 deleted: false,
             },
             relations: {
-                employer: true,
+                employer: {
+                    role: {
+                        applicant: true,
+                        individual: true,
+                        legal_entity: true,
+                        moderator: true,
+                    }
+                },
                 category: true,
             }
         })
@@ -83,7 +90,14 @@ export class VacanciesService {
             },
             relations: {
                 category: true,
-                employer: true,
+                employer: {
+                    role: {
+                        applicant: true,
+                        individual: true,
+                        legal_entity: true,
+                        moderator: true,
+                    }
+                },
             }
         };
 
@@ -174,12 +188,16 @@ export class VacanciesService {
 
     async edit(editVacancyDto: EditVacancyDto, user: UserJwtDto) {
 
+        
         let vacancy = await this.vacancyRepository.findOne({
             where: {
                 uuid: editVacancyDto.uuid,
                 deleted: false,
                 banned: false,
             },
+            relations: {
+                employer: true,
+            }
         })
 
         if(!vacancy) throw new BadRequestException(responses.doesntExistUUID('Vacancy'));
