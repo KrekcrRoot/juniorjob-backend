@@ -11,6 +11,7 @@ import { VacancyCategoryService } from './vacancies.category.service';
 @Module({
   imports: [TypeOrmModule.forFeature([Vacancy, VacancyCategory]), UsersModule],
   controllers: [VacanciesController, VacanciesCategories],
-  providers: [VacanciesService, VacancyCategoryService]
+  providers: [VacanciesService, VacancyCategoryService],
+  exports: [VacanciesService],
 })
 export class VacanciesModule {}

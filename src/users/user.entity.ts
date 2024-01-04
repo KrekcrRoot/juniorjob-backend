@@ -11,7 +11,6 @@ import {
 import { City } from '../cities/city.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'src/roles/role.entity';
-import { Exclude } from 'class-transformer';
 
 @Entity('Users')
 export class User {

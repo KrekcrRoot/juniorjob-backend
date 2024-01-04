@@ -22,8 +22,9 @@ import { VacanciesModule } from './vacancies/vacancies.module';
 import { Vacancy } from './vacancies/vacancy.entity';
 import { VacancyCategory } from './vacancies/vacancy-category.entity';
 import { StorageController } from './storage/storage.controller';
-import { ServerController } from './server/server.controller';
 import { ServerModule } from './server/server.module';
+import { VacancyResponsesModule } from './vacancy-responses/vacancy-responses.module';
+import { VacancyResponse } from './vacancy-responses/vacancy-response.entity';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ServerModule } from './server/server.module';
         Moderator,
         Vacancy,
         VacancyCategory,
+        VacancyResponse,
       ],
       synchronize: true,
     }),
@@ -56,6 +58,7 @@ import { ServerModule } from './server/server.module';
     RolesModule,
     VacanciesModule,
     ServerModule,
+    VacancyResponsesModule,
   ],
   controllers: [CoursesController, AuthController, StorageController],
   providers: [AuthService],

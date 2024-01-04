@@ -105,7 +105,7 @@ export class UsersService {
       },
     });
 
-    if (user.deleted) return null;
+    if (!user || user.deleted) return null;
     return user;
   }
 

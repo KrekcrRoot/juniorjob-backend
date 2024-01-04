@@ -9,5 +9,5 @@ export class UUIDVacancyDto {
     @IsString()
     @IsUUID('4')
     @IsNotEmpty()
-    vacancy_uuid: string;
+    uuid: string;
 }
