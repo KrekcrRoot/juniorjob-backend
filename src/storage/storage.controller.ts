@@ -6,31 +6,34 @@ import {
   Res,
   StreamableFile,
 } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import * as fs from 'fs';
 import { join } from 'path';
 import type { Response } from 'express';
 import constants from 'src/global/constants';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Storage')
 @Controller('storage')
 export class StorageController {
+  constructor(private configService: ConfigService) {}
+
   @ApiOperation({ summary: 'Return vacancy image from store' })
   @Get('/vacancies/:filename')
   getVacancyImage(
     @Param() params: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const process_cwd = join(process.cwd(), '/..');
-    const categoryPath = join(process_cwd, constants.vacanciesCategoryFolder);
-    const vacancyPath = join(process_cwd, constants.vacanciesFolder);
+    const vacancyPath = join(
+      this.configService.get<string>('STORAGE_FOLDER'),
+      constants.vacanciesFolder,
+    );
 
     if (!fs.existsSync(join(vacancyPath, params.filename))) {
       throw new BadRequestException('File not exist');
     }
 
     const file = fs.createReadStream(join(vacancyPath, params.filename));
-
     const file_params = params.filename.split('.');
 
     if (file_params[file_params.length - 1] == 'png') {
@@ -51,16 +54,16 @@ export class StorageController {
     @Param() params: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const process_cwd = join(process.cwd(), '/..');
-    const categoryPath = join(process_cwd, constants.vacanciesCategoryFolder);
-    const usersPath = join(process_cwd, constants.usersFolder);
+    const usersPath = join(
+      this.configService.get<string>('STORAGE_FOLDER'),
+      constants.usersFolder,
+    );
 
     if (!fs.existsSync(join(usersPath, params.filename))) {
       throw new BadRequestException('File not exist');
     }
 
     const file = fs.createReadStream(join(usersPath, params.filename));
-
     const file_params = params.filename.split('.');
 
     if (file_params[file_params.length - 1] == 'png') {
@@ -81,15 +84,16 @@ export class StorageController {
     @Param() params: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const process_cwd = join(process.cwd(), '/..');
-    const categoryPath = join(process_cwd, constants.vacanciesCategoryFolder);
+    const categoryPath = join(
+      this.configService.get<string>('STORAGE_FOLDER'),
+      constants.vacanciesCategoryFolder,
+    );
 
     if (!fs.existsSync(join(categoryPath, params.filename))) {
       throw new BadRequestException('File not exist');
     }
 
     const file = fs.createReadStream(join(categoryPath, params.filename));
-
     const file_params = params.filename.split('.');
 
     if (file_params[file_params.length - 1] == 'png') {
@@ -101,8 +105,6 @@ export class StorageController {
         'Content-Type': 'image/jpeg',
       });
     }
-
-    console.log(file);
 
     return new StreamableFile(file);
   }

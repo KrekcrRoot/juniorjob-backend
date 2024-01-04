@@ -1,5 +1,23 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from './user.entity';
 import { UsersService } from './users.service';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
@@ -14,12 +32,16 @@ import { FileTypeValidationPipe } from 'src/vacancies/vacancies.image.pipe';
 import constants from 'src/global/constants';
 import * as fs from 'fs';
 import { AllFilterDto } from './dto/all-users-filter.dto';
-import { query } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { join } from 'path';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private configService: ConfigService,
+  ) {}
 
   @ApiResponse({
     status: HttpStatus.OK,
@@ -48,7 +70,7 @@ export class UsersController {
   getInfoByToken(@Req() req: TokenRequest) {
     return this.usersService.findByUUID(req.user.uuid);
   }
-  
+
   @ApiResponse({
     status: HttpStatus.OK,
     type: User,
@@ -79,16 +101,22 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('image'))
   @ApiBearerAuth()
   @Post('/uploadImage')
-  uploadImage(@Req() auth: TokenRequest, @UploadedFile(new FileTypeValidationPipe()) file: Express.Multer.File) {
-
+  uploadImage(
+    @Req() auth: TokenRequest,
+    @UploadedFile(new FileTypeValidationPipe()) file: Express.Multer.File,
+  ) {
     const filearr = file.originalname.split('.');
     const type = filearr[filearr.length - 1];
 
-    const fileName = constants.usersFolder + Date.now() + '.' + type;
-    fs.writeFileSync(__dirname + '/../..' + fileName, file.buffer);
+    const fileRaw = Date.now() + '.' + type;
+    const filePwd = join(
+      this.configService.get<string>('STORAGE_FOLDER'),
+      constants.usersFolder,
+      fileRaw,
+    );
+    fs.writeFileSync(filePwd, file.buffer);
 
-    return this.usersService.updateImage(auth.user.uuid, fileName);
-
+    return this.usersService.updateImage(auth.user.uuid, fileRaw);
   }
 
   @ApiResponse({
@@ -100,7 +128,10 @@ export class UsersController {
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @Post('/changePassword')
-  changePassword(@Body() changePasswordDto: ChangePasswordDto, @Req() req: TokenRequest) {
+  changePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Req() req: TokenRequest,
+  ) {
     return this.usersService.changePassword(changePasswordDto, req.user.uuid);
   }
 
@@ -115,7 +146,7 @@ export class UsersController {
   @Roles(UserRole.Moderator)
   ban(@Body() userUUID: UserUUID) {
     return this.usersService.ban(userUUID.uuid);
-  } 
+  }
 
   @ApiResponse({
     status: HttpStatus.OK,

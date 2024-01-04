@@ -14,7 +14,7 @@ import responses from 'src/global/responses';
 import { AllFilterDto } from './dto/all-users-filter.dto';
 
 export interface FilterProperties {
-  [key: string]: any
+  [key: string]: any;
 }
 
 @Injectable()
@@ -33,12 +33,13 @@ export class UsersService {
   ) {}
 
   async getAllUsers(filters: AllFilterDto) {
-    let page = 0, row = 30;
+    let page = 0,
+      row = 30;
 
-    if(filters.page !== undefined) page = filters.page;
-    if(filters.row !== undefined) row = filters.row;
+    if (filters.page !== undefined) page = filters.page;
+    if (filters.row !== undefined) row = filters.row;
 
-    if(filters.byDate !== undefined) {
+    if (filters.byDate !== undefined) {
       return await this.usersRepository.find({
         skip: page * row,
         take: row,
@@ -49,11 +50,11 @@ export class UsersService {
         relations: {
           city: true,
           role: true,
-        }
+        },
       });
     }
 
-    let query: FilterProperties = {
+    const query: FilterProperties = {
       skip: page * row,
       take: row,
       where: {
@@ -65,12 +66,12 @@ export class UsersService {
       },
     };
 
-    if(filters.sortByCreatedAt !== undefined) {
+    if (filters.sortByCreatedAt !== undefined) {
       query.order = {};
       query.order.created_at = filters.sortByCreatedAt == 'Up' ? 'ASC' : 'DESC';
     }
-    if(filters.sortByUpdatedAt !== undefined) {
-      query.order == undefined ? query.order = {} : false;
+    if (filters.sortByUpdatedAt !== undefined) {
+      query.order == undefined ? (query.order = {}) : false;
       query.order.updated_at = filters.sortByUpdatedAt == 'Up' ? 'ASC' : 'DESC';
     }
 
@@ -87,7 +88,7 @@ export class UsersService {
         role: true,
       },
     });
-    
+
     if (!user) return null;
 
     if (user.deleted) return null;
@@ -167,7 +168,7 @@ export class UsersService {
       uuid: user_uuid,
     });
 
-    if(!user) {
+    if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
 
@@ -183,66 +184,58 @@ export class UsersService {
   }
 
   async ban(user_uuid: string) {
-
     const user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
     });
 
-    if(!user) {
+    if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
 
     user.banned = true;
 
     return this.usersRepository.save(user);
-
   }
 
   async unban(user_uuid: string) {
-
     const user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
     });
 
-    if(!user) {
+    if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
 
     user.banned = false;
 
     return this.usersRepository.save(user);
-
   }
 
   async delete(user_uuid: string) {
-
     const user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
     });
 
-    if(!user) {
+    if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
 
     user.deleted = true;
 
     return this.usersRepository.save(user);
-
   }
 
   async updateImage(user_uuid: string, image: string) {
-   
     const user = await this.usersRepository.findOneBy({
       uuid: user_uuid,
     });
 
-    if(!user) {
+    if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
 
     user.image = image;
 
     return this.usersRepository.save(user);
-    
   }
 }

@@ -1,7 +1,5 @@
-
 export default {
-  storageFolder: '/storage/',
-  vacanciesFolder: '/storage/vacancies/',
-  vacanciesCategoryFolder: '/storage/vacanciesCategory/',
-  usersFolder: '/storage/users/'
-}
+  vacanciesFolder: '/vacancies/',
+  vacanciesCategoryFolder: '/vacanciesCategory/',
+  usersFolder: '/users/',
+};

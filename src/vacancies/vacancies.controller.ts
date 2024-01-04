@@ -39,13 +39,16 @@ import constants from 'src/global/constants';
 import responses from 'src/global/responses';
 import * as fs from 'fs';
 import { AllFilterDto } from 'src/users/dto/all-users-filter.dto';
+import { join } from 'path';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Vacancies')
 @Controller('vacancies')
 export class VacanciesController {
   constructor(
     private vacanciesService: VacanciesService,
-    private usersSerivice: UsersService,
+    private usersService: UsersService,
+    private configService: ConfigService,
   ) {}
 
   // Post
@@ -64,7 +67,7 @@ export class VacanciesController {
     @Req() req: TokenRequest,
     @Body() createVacancyDto: CreateVacancyDto,
   ) {
-    const user = await this.usersSerivice.findByUUID(req.user.uuid);
+    const user = await this.usersService.findByUUID(req.user.uuid);
     return this.vacanciesService.create(createVacancyDto, user);
   }
 
@@ -125,10 +128,15 @@ export class VacanciesController {
     const filearr = file.originalname.split('.');
     const type = filearr[filearr.length - 1];
 
-    const fileName = constants.vacanciesFolder + Date.now() + '.' + type;
-    fs.writeFileSync(__dirname + '/../..' + fileName, file.buffer);
+    const fileRaw = Date.now() + '.' + type;
+    const filePwd = join(
+      this.configService.get<string>('STORAGE_FOLDER'),
+      constants.vacanciesFolder,
+      fileRaw,
+    );
+    fs.writeFileSync(filePwd, file.buffer);
 
-    return this.vacanciesService.editImage(req.uuid, fileName);
+    return this.vacanciesService.editImage(req.uuid, fileRaw);
   }
 
   // Put
@@ -193,7 +201,7 @@ export class VacanciesController {
   @Roles(UserRole.Individual, UserRole.LegalEntity)
   @Get('/my')
   async getMy(@Req() req: TokenRequest) {
-    const user = await this.usersSerivice.findByUUID(req.user.uuid);
+    const user = await this.usersService.findByUUID(req.user.uuid);
     return this.vacanciesService.getByEmployer(user);
   }
 

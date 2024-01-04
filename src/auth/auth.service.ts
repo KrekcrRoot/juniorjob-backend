@@ -9,7 +9,7 @@ import {
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as argon2 from 'argon2';
-import { SignInAuthDto } from './dto/signin-auth.dto'; 
+import { SignInAuthDto } from './dto/signin-auth.dto';
 import { SignUpAuthDto } from './dto/signup-auth.dto';
 import { CitiesService } from 'src/cities/cities.service';
 import { Tokens } from './dto/tokens.dto';
@@ -20,14 +20,13 @@ import responses from 'src/global/responses';
 
 @Injectable()
 export class AuthService {
-
   constructor(
     private userService: UsersService,
     private jwtService: JwtService,
     private citiesService: CitiesService,
     private configService: ConfigService,
   ) {}
-  
+
   async signinLocal(signInAuthDto: SignInAuthDto) {
     const user = await this.userService.findOne(signInAuthDto.email);
 
@@ -45,7 +44,7 @@ export class AuthService {
       uuid: user.uuid,
       email: user.email,
       role: user.role.current,
-    }
+    };
 
     const tokens = await this.tokens(payload);
     this.setRefreshToken(user.uuid, tokens.refresh_token);
@@ -58,7 +57,6 @@ export class AuthService {
   }
 
   async signupLocal(signUpAuthDto: SignUpAuthDto): Promise<Tokens> {
-
     // Check user exists
     const userExists = await this.userService.findOne(signUpAuthDto.email);
 
@@ -67,7 +65,9 @@ export class AuthService {
     }
 
     // Check city exists
-    const city = await this.citiesService.getCityByUUID(signUpAuthDto.city_uuid);
+    const city = await this.citiesService.getCityByUUID(
+      signUpAuthDto.city_uuid,
+    );
 
     if (!city) {
       throw new BadRequestException(responses.doesntExist('City uuid'));
@@ -84,7 +84,7 @@ export class AuthService {
       uuid: user.uuid,
       email: user.email,
       role: user.role.current,
-    }
+    };
 
     const tokens = await this.tokens(dto);
     await this.setRefreshToken(user.uuid, tokens.refresh_token);
@@ -98,28 +98,29 @@ export class AuthService {
   }
 
   async logout(user_uuid: string) {
-    let user = await this.userService.findByUUID(user_uuid);
+    const user = await this.userService.findByUUID(user_uuid);
 
-    if(user.hashedRefreshToken == null) throw new HttpException(responses.userIsNotLogged, HttpStatus.BAD_REQUEST);
+    if (user.hashedRefreshToken == null)
+      throw new HttpException(
+        responses.userIsNotLogged,
+        HttpStatus.BAD_REQUEST,
+      );
 
     user.hashedRefreshToken = null;
     const saved_user = await this.userService.saveUser(user);
 
-    if(saved_user) {
+    if (saved_user) {
       return {
         message: responses.logoutSuccess,
         statusCode: 200,
-      }
+      };
     } else {
       return {
         message: responses.logoutUnsuccessed,
         statusCode: 500,
-      }
+      };
     }
-
   }
-
-
 
   // Working with tokens
 
@@ -131,8 +132,10 @@ export class AuthService {
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRATION_TIME'),
-      })
+        expiresIn: this.configService.get<string>(
+          'JWT_REFRESH_EXPIRATION_TIME',
+        ),
+      }),
     ]);
 
     return {
@@ -142,29 +145,34 @@ export class AuthService {
   }
 
   async refreshTokens(tokenUpdateReq: TokenUpdateReq) {
+    const expired_access_token = this.jwtService.decode(
+      tokenUpdateReq.access_token,
+    ) as UserJwtDto;
+    const user = await this.userService.findByUUID(expired_access_token.uuid);
 
-    const expired_access_token = this.jwtService.decode(tokenUpdateReq.access_token) as UserJwtDto;
-    let user = await this.userService.findByUUID(expired_access_token.uuid);
-    
-    if(!user || !user.hashedRefreshToken) throw new ForbiddenException(responses.accessDenied);
+    if (!user || !user.hashedRefreshToken)
+      throw new ForbiddenException(responses.accessDenied);
 
     try {
       this.jwtService.verify(tokenUpdateReq.refresh_token, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-      })
-    } catch(error) {
+      });
+    } catch (error) {
       throw new ForbiddenException(responses.refreshTokenExpiredOrInvalid);
     }
 
-    const token_verify = await argon2.verify(user.hashedRefreshToken, tokenUpdateReq.refresh_token);
+    const token_verify = await argon2.verify(
+      user.hashedRefreshToken,
+      tokenUpdateReq.refresh_token,
+    );
 
-    if(!token_verify) throw new ForbiddenException(responses.accessDenied);
+    if (!token_verify) throw new ForbiddenException(responses.accessDenied);
 
     const payload: UserJwtDto = {
       uuid: user.uuid,
       email: user.email,
       role: user.role.current,
-    }
+    };
 
     const tokens = await this.tokens(payload);
     this.setRefreshToken(user.uuid, tokens.refresh_token);
