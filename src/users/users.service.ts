@@ -12,6 +12,9 @@ import { Moderator } from 'src/roles/models/moderator-role.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import responses from 'src/global/responses';
 import { AllFilterDto } from './dto/all-users-filter.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationEnum } from '../notifications/notification.enum';
+import notifications from '../global/notifications';
 
 export interface FilterProperties {
   [key: string]: any;
@@ -30,6 +33,7 @@ export class UsersService {
     @InjectRepository(Moderator)
     private moderatorRepository: Repository<Moderator>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
+    private notificationsService: NotificationsService,
   ) {}
 
   async getAllUsers(filters: AllFilterDto) {
@@ -180,6 +184,15 @@ export class UsersService {
     if (!result) throw new HttpException(responses.accessDenied, 401);
 
     user.password = await argon2.hash(changePasswordDto.new_password);
+
+    this.notificationsService
+      .create({
+        user: user,
+        type: NotificationEnum.Default,
+        body: notifications.changedPassword,
+      })
+      .then();
+
     return this.usersRepository.save(user);
   }
 

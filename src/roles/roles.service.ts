@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Applicant } from './models/applicant-role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -17,38 +21,36 @@ import responses from 'src/global/responses';
 
 @Injectable()
 export class RolesService {
- 
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    @InjectRepository(Applicant) private applicantRepository: Repository<Applicant>,
-    @InjectRepository(Individual) private individualRepository: Repository<Individual>,
-    @InjectRepository(LegalEntity) private legalEntityRepository: Repository<LegalEntity>,
-    @InjectRepository(Moderator) private moderatorRepository: Repository<Moderator>,
+    @InjectRepository(Applicant)
+    private applicantRepository: Repository<Applicant>,
+    @InjectRepository(Individual)
+    private individualRepository: Repository<Individual>,
+    @InjectRepository(LegalEntity)
+    private legalEntityRepository: Repository<LegalEntity>,
+    @InjectRepository(Moderator)
+    private moderatorRepository: Repository<Moderator>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
   ) {}
 
   async findUserRole(user_uuid: string) {
-    
     const user = await this.usersRepository.findOne({
       where: {
         uuid: user_uuid,
       },
       relations: {
-        role: true
+        role: true,
       },
     });
 
-    if(!user) throw new BadRequestException(responses.notFound('User'));
+    if (!user) throw new BadRequestException(responses.notFound('User'));
 
-    const role = await this.findRole(user.role.uuid);
-
-    return role;
-
+    return await this.findRole(user.role.uuid);
   }
 
   async findRole(role_uuid: string) {
-
-    const role = await this.roleRepository.findOne({
+    return await this.roleRepository.findOne({
       where: {
         uuid: role_uuid,
       },
@@ -57,89 +59,85 @@ export class RolesService {
         individual: true,
         legal_entity: true,
         moderator: true,
-      }
+      },
     });
-
-    return role;
-
   }
 
   async findApplicant(applicant_uuid: string) {
-
     const applicant = await this.applicantRepository.findOneBy({
       uuid: applicant_uuid,
     });
 
-    if(!applicant) throw new BadRequestException(responses.notFound('Applicant'));
+    if (!applicant)
+      throw new BadRequestException(responses.notFound('Applicant'));
 
     return applicant;
-
   }
 
   async findIndividual(individual_uuid: string) {
-
     const individual = await this.individualRepository.findOneBy({
       uuid: individual_uuid,
     });
 
-    if(!individual) throw new BadRequestException(responses.notFound('Individual'));
+    if (!individual)
+      throw new BadRequestException(responses.notFound('Individual'));
 
     return individual;
-
   }
 
   async findModerator(moderator_uuid: string) {
-
     const moderator = await this.moderatorRepository.findOneBy({
       uuid: moderator_uuid,
     });
 
-    if(!moderator) throw new BadRequestException(responses.notFound('Moderator'));
+    if (!moderator)
+      throw new BadRequestException(responses.notFound('Moderator'));
 
     return moderator;
-
   }
 
   async findLegalEntity(legal_entity_uuid: string) {
-
     const legal_entity = await this.legalEntityRepository.findOneBy({
       uuid: legal_entity_uuid,
     });
 
-    if(!legal_entity) throw new BadRequestException(responses.notFound('Legal entity'));
+    if (!legal_entity)
+      throw new BadRequestException(responses.notFound('Legal entity'));
 
     return legal_entity;
-
   }
-
 
   // Updating roles
 
-  async updateApplicant(applicantDto: ApplicantUpdateDto, applicant_uuid: string) {
-
+  async updateApplicant(
+    applicantDto: ApplicantUpdateDto,
+    applicant_uuid: string,
+  ) {
     let role = await this.applicantRepository.findOneBy({
       uuid: applicant_uuid,
     });
 
-    if(!role) {
+    if (!role) {
       throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
     role = {
       uuid: role.uuid,
-      ...applicantDto
+      ...applicantDto,
     };
 
-    return await this.applicantRepository.save(role); 
+    return await this.applicantRepository.save(role);
   }
 
-  async updateIndividual(individualDto: IndividualUpdateDto, individual_uuid: string) {
-
+  async updateIndividual(
+    individualDto: IndividualUpdateDto,
+    individual_uuid: string,
+  ) {
     let role = await this.individualRepository.findOneBy({
       uuid: individual_uuid,
     });
 
-    if(!role) {
+    if (!role) {
       throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
@@ -149,16 +147,17 @@ export class RolesService {
     };
 
     return await this.individualRepository.save(role);
-
   }
 
-  async updateLegalEntity(legalEntityDto: LegalEntityUpdateDto, legal_entity_uuid: string) {
-
+  async updateLegalEntity(
+    legalEntityDto: LegalEntityUpdateDto,
+    legal_entity_uuid: string,
+  ) {
     let role = await this.legalEntityRepository.findOneBy({
       uuid: legal_entity_uuid,
     });
 
-    if(!role) {
+    if (!role) {
       throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
@@ -168,16 +167,17 @@ export class RolesService {
     };
 
     return await this.legalEntityRepository.save(role);
-
   }
 
-  async updateModerator(moderatorDto: ModeratorUpdateDto, moderator_uuid: string) {
-
+  async updateModerator(
+    moderatorDto: ModeratorUpdateDto,
+    moderator_uuid: string,
+  ) {
     let role = await this.moderatorRepository.findOneBy({
       uuid: moderator_uuid,
     });
 
-    if(!role) {
+    if (!role) {
       throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
@@ -187,20 +187,20 @@ export class RolesService {
     };
 
     return await this.moderatorRepository.save(role);
-
   }
 
   async changeCurrentRole(changeRoleDto: ChangeRoleDto, userJwt: UserJwtDto) {
-
-    if(changeRoleDto.role == userJwt.role) {
+    if (changeRoleDto.role == userJwt.role) {
       throw new BadRequestException(responses.userAlreadyHaveRole);
     }
 
-    if(changeRoleDto.role == 'moderator') {
-      throw new ForbiddenException(responses.permission('change role to moderator'));
+    if (changeRoleDto.role == 'moderator') {
+      throw new ForbiddenException(
+        responses.permission('change role to moderator'),
+      );
     }
 
-    let user = await this.usersRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: {
         uuid: userJwt.uuid,
       },
@@ -212,7 +212,5 @@ export class RolesService {
     user.role.current = changeRoleDto.role;
 
     return await this.roleRepository.save(user.role);
-
   }
-
 }

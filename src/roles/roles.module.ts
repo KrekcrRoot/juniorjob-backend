@@ -10,14 +10,16 @@ import { User } from 'src/users/user.entity';
 import { RolesController } from './roles.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([
-    Role, 
-    Applicant, 
-    Individual, 
-    LegalEntity,
-    Moderator,
-    User,
-  ])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Role,
+      Applicant,
+      Individual,
+      LegalEntity,
+      Moderator,
+      User,
+    ]),
+  ],
   providers: [RolesService],
   controllers: [RolesController],
   exports: [RolesService],

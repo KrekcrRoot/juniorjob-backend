@@ -17,6 +17,9 @@ import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 import { ConfigService } from '@nestjs/config';
 import { TokenUpdateReq } from './dto/token-update-req.dto';
 import responses from 'src/global/responses';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationEnum } from '../notifications/notification.enum';
+import notifications from '../global/notifications';
 
 @Injectable()
 export class AuthService {
@@ -25,9 +28,10 @@ export class AuthService {
     private jwtService: JwtService,
     private citiesService: CitiesService,
     private configService: ConfigService,
+    private notificationService: NotificationsService,
   ) {}
 
-  async signinLocal(signInAuthDto: SignInAuthDto) {
+  async signInLocal(signInAuthDto: SignInAuthDto) {
     const user = await this.userService.findOne(signInAuthDto.email);
 
     if (!user) {
@@ -47,7 +51,13 @@ export class AuthService {
     };
 
     const tokens = await this.tokens(payload);
-    this.setRefreshToken(user.uuid, tokens.refresh_token);
+    await this.setRefreshToken(user.uuid, tokens.refresh_token);
+
+    await this.notificationService.create({
+      user: user,
+      type: NotificationEnum.Warning,
+      body: notifications.signIn,
+    });
 
     return tokens;
   }
@@ -94,7 +104,7 @@ export class AuthService {
 
   async setRefreshToken(user_uuid: string, refresh_token: string) {
     const hashedRefreshToken = await this.hashData(refresh_token);
-    this.userService.update_refresh_token(user_uuid, hashedRefreshToken);
+    await this.userService.update_refresh_token(user_uuid, hashedRefreshToken);
   }
 
   async logout(user_uuid: string) {
@@ -175,7 +185,7 @@ export class AuthService {
     };
 
     const tokens = await this.tokens(payload);
-    this.setRefreshToken(user.uuid, tokens.refresh_token);
+    await this.setRefreshToken(user.uuid, tokens.refresh_token);
 
     return tokens;
   }

@@ -25,6 +25,8 @@ import { StorageController } from './storage/storage.controller';
 import { ServerModule } from './server/server.module';
 import { VacancyResponsesModule } from './vacancy-responses/vacancy-responses.module';
 import { VacancyResponse } from './vacancy-responses/vacancy-response.entity';
+import { NotificationsModule } from './notifications/notifications.module';
+import { Notification } from './notifications/notification.entity';
 
 @Module({
   imports: [
@@ -49,6 +51,7 @@ import { VacancyResponse } from './vacancy-responses/vacancy-response.entity';
         Vacancy,
         VacancyCategory,
         VacancyResponse,
+        Notification,
       ],
       synchronize: true,
     }),
@@ -59,6 +62,7 @@ import { VacancyResponse } from './vacancy-responses/vacancy-response.entity';
     VacanciesModule,
     ServerModule,
     VacancyResponsesModule,
+    NotificationsModule,
   ],
   controllers: [CoursesController, AuthController, StorageController],
   providers: [AuthService],

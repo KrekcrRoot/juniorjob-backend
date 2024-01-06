@@ -11,9 +11,22 @@ import { Role } from 'src/roles/role.entity';
 import { Moderator } from 'src/roles/models/moderator-role.entity';
 import { UsersFactory } from './users.factory';
 import { RolesModule } from 'src/roles/roles.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Applicant, Individual, LegalEntity, Role, Moderator]), CitiesModule, RolesModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Applicant,
+      Individual,
+      LegalEntity,
+      Role,
+      Moderator,
+    ]),
+    CitiesModule,
+    RolesModule,
+    NotificationsModule,
+  ],
   exports: [TypeOrmModule, UsersService, UsersFactory],
   controllers: [UsersController],
   providers: [UsersService, UsersFactory],

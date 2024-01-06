@@ -37,8 +37,8 @@ export class AuthController {
   @ApiOperation({ summary: 'authorization → signIn (Login)' })
   @Post('/local/signin')
   @HttpCode(HttpStatus.OK)
-  signinLocal(@Body() loginAuthDto: SignInAuthDto) {
-    return this.authService.signinLocal(loginAuthDto);
+  signInLocal(@Body() loginAuthDto: SignInAuthDto) {
+    return this.authService.signInLocal(loginAuthDto);
   }
 
   @ApiResponse({
