@@ -34,6 +34,7 @@ import * as fs from 'fs';
 import { AllFilterDto } from './dto/all-users-filter.dto';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
+import { ChangeEmailDto } from './dto/change-email.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -121,7 +122,7 @@ export class UsersController {
 
   @ApiResponse({
     status: HttpStatus.OK,
-    type: Boolean,
+    type: User,
     description: 'Change user password',
   })
   @ApiOperation({ summary: 'Change user password' })
@@ -133,6 +134,22 @@ export class UsersController {
     @Req() req: TokenRequest,
   ) {
     return this.usersService.changePassword(changePasswordDto, req.user.uuid);
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: User,
+    description: 'Change user email',
+  })
+  @ApiOperation({ summary: 'Change user email' })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Post('/changeEmail')
+  changeEmail(
+    @Body() changeEmailDto: ChangeEmailDto,
+    @Req() req: TokenRequest,
+  ) {
+    return this.usersService.changeEmail(changeEmailDto, req.user.uuid);
   }
 
   @ApiResponse({

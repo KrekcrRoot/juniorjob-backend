@@ -15,6 +15,7 @@ import { AllFilterDto } from './dto/all-users-filter.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationEnum } from '../notifications/notification.enum';
 import notifications from '../global/notifications';
+import { ChangeEmailDto } from './dto/change-email.dto';
 
 export interface FilterProperties {
   [key: string]: any;
@@ -161,6 +162,35 @@ export class UsersService {
     });
 
     user.hashedRefreshToken = hashed_token;
+    return this.usersRepository.save(user);
+  }
+
+  async changeEmail(changeEmailDto: ChangeEmailDto, user_uuid: string) {
+    const user = await this.usersRepository.findOne({
+      where: {
+        uuid: user_uuid,
+        deleted: false,
+        banned: false,
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException(responses.doesntExistUUID('User'));
+    }
+
+    const result = await argon2.verify(user.password, changeEmailDto.password);
+    if (!result) throw new HttpException(responses.accessDenied, 401);
+
+    user.email = changeEmailDto.email;
+
+    this.notificationsService
+      .create({
+        user: user,
+        type: NotificationEnum.Warning,
+        body: notifications.changedEmail,
+      })
+      .then();
+
     return this.usersRepository.save(user);
   }
 
