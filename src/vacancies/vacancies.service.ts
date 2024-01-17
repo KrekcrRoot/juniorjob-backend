@@ -1,10 +1,6 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { CreateVacancyDto } from './dto/create-vacancy.dto';
 import { User } from 'src/users/user.entity';
 import { VacancyCategory } from './vacancy-category.entity';
@@ -15,6 +11,18 @@ import { UserRole } from 'src/roles/role.enum';
 import { EditVacancyDto } from './dto/edit-vacancy.dto';
 import { AllFilterDto } from 'src/users/dto/all-users-filter.dto';
 import { FilterProperties } from 'src/users/users.service';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
+
+export class AllFiltersSearchDto extends AllFilterDto {
+  @ApiProperty({
+    required: true,
+    example: 'Some query',
+    description: 'Query of search',
+  })
+  @IsString()
+  query: string;
+}
 
 @Injectable()
 export class VacanciesService {
@@ -81,7 +89,7 @@ export class VacanciesService {
     });
   }
 
-  async all(filters: AllFilterDto): Promise<Array<Vacancy> | null> {
+  makeQuery(filters: AllFilterDto) {
     let page = 0,
       row = 30;
 
@@ -116,9 +124,18 @@ export class VacanciesService {
       query.order.updated_at = filters.sortByUpdatedAt == 'Up' ? 'ASC' : 'DESC';
     }
 
-    const vacancy = await this.vacancyRepository.find(query);
+    return query;
+  }
 
-    return vacancy;
+  async search(filters: AllFiltersSearchDto) {
+    const query = this.makeQuery(filters);
+    query.where.title = ILike(`%${filters.query}%`);
+    return await this.vacancyRepository.find(query);
+  }
+
+  async all(filters: AllFilterDto): Promise<Array<Vacancy> | null> {
+    const query = this.makeQuery(filters);
+    return await this.vacancyRepository.find(query);
   }
 
   async ban(vacancy_uuid: string) {

@@ -15,7 +15,7 @@ import {
   ForbiddenException,
   Query,
 } from '@nestjs/common';
-import { VacanciesService } from './vacancies.service';
+import { AllFiltersSearchDto, VacanciesService } from './vacancies.service';
 import { Vacancy } from './vacancy.entity';
 import { isUUID } from 'class-validator';
 import {
@@ -187,6 +187,18 @@ export class VacanciesController {
   @Get('/all')
   getAll(@Query() filters: AllFilterDto) {
     return this.vacanciesService.all(filters);
+  }
+
+  @ApiResponse({
+    status: HttpStatus.OK,
+    type: Vacancy,
+    isArray: true,
+    description: 'Search vacancies',
+  })
+  @ApiOperation({ summary: 'Response all vacancies by search' })
+  @Get('/search')
+  getBySearch(@Query() filters: AllFiltersSearchDto) {
+    return this.vacanciesService.search(filters);
   }
 
   @ApiResponse({

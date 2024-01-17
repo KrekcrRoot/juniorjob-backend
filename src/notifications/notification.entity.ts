@@ -2,8 +2,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
-  ManyToMany,
+  JoinTable,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -16,8 +16,8 @@ export class Notification {
   @PrimaryGeneratedColumn('uuid')
   uuid: string;
 
-  @ManyToMany(() => User, (user) => user.uuid)
-  @JoinColumn()
+  @ManyToOne(() => User, (user) => user.uuid)
+  @JoinTable()
   user: User;
 
   @Column({
@@ -27,12 +27,24 @@ export class Notification {
   })
   type: NotificationEnum;
 
+  @ApiProperty({
+    example: false,
+    description: 'Body of notification',
+  })
   @Column()
   body: string;
 
+  @ApiProperty({
+    example: false,
+    description: 'Viewed marker for notification',
+  })
   @Column({ default: false })
   viewed: boolean;
 
+  @ApiProperty({
+    example: false,
+    description: 'Deleted marker for notification',
+  })
   @Column({ default: false })
   deleted: boolean;
 

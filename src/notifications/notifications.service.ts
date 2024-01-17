@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { Notification } from './notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { User } from '../users/user.entity';
+import { SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
 export class NotificationsService {
   constructor(
     @InjectRepository(Notification)
     private notificationsRepository: Repository<Notification>,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
 
   async getByUUID(uuid: string) {
@@ -24,7 +26,11 @@ export class NotificationsService {
   async getByUser(user: User) {
     return this.notificationsRepository.find({
       where: {
-        user: user,
+        user: {
+          uuid: user.uuid,
+          deleted: false,
+          banned: false,
+        },
         deleted: false,
       },
     });
@@ -37,7 +43,17 @@ export class NotificationsService {
       ...createNotificationDto,
     });
 
-    return await this.notificationsRepository.save(notification);
+    const res = await this.notificationsRepository.save(notification);
+
+    const callback = () => {
+      this.notificationsRepository.delete(res.uuid);
+      this.schedulerRegistry.deleteTimeout(`${res.uuid}`);
+    };
+
+    const timeout = setTimeout(callback, 60 * 1000);
+    this.schedulerRegistry.addTimeout(`${res.uuid}`, timeout);
+
+    return res;
   }
 
   async viewed(notification: Notification): Promise<Notification> {
@@ -50,5 +66,9 @@ export class NotificationsService {
     await this.notificationsRepository.save(notification);
 
     return true;
+  }
+
+  async all() {
+    return this.notificationsRepository.find();
   }
 }

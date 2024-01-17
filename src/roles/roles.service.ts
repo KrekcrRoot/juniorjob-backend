@@ -3,7 +3,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Applicant } from './models/applicant-role.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
@@ -61,6 +61,28 @@ export class RolesService {
         moderator: true,
       },
     });
+  }
+
+  async findApplicantByName(name: string) {
+    return await this.applicantRepository.find({
+      where: {
+        name: ILike(`%${name}%`),
+      },
+    });
+  }
+
+  async findApplicantBySurname(surname: string) {
+    return await this.applicantRepository.find({
+      where: {
+        surname: ILike(`%${surname}%`),
+      },
+    });
+  }
+
+  async findApplicantByFullName(full_name: string) {
+    const result = await this.findApplicantBySurname(full_name.split(' ')[0]);
+    result.concat(await this.findApplicantBySurname(full_name.split(' ')[1]));
+    return result;
   }
 
   async findApplicant(applicant_uuid: string) {

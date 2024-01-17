@@ -1,4 +1,15 @@
-import { Controller, Get, HttpStatus, Param, Put, Req, Body, UseGuards, BadRequestException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  Put,
+  Req,
+  Body,
+  UseGuards,
+  BadRequestException,
+  Query
+} from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
@@ -63,6 +74,18 @@ export class RolesController {
 
   @ApiResponse({
     status: HttpStatus.OK,
+    type: Role,
+    description: 'Return applicants by full name',
+  })
+  @ApiOperation({ summary: 'Return role by full name' })
+  @Get('/applicant/search')
+  getSearchApplicant(@Query() query: any) {
+    return this.rolesService.findApplicantByFullName(query.fullName.trim());
+  }
+
+
+  @ApiResponse({
+    status: HttpStatus.OK,
     type: Applicant,
     description: 'Return applicant by uuid',
   })
@@ -118,7 +141,10 @@ export class RolesController {
   @UseGuards(AccessTokenGuard)
   @Put('/change')
   changeCurrent(@Body() changeRoleDto: ChangeRoleDto, @Req() tokenRequest: TokenRequest) {
-    return this.rolesService.changeCurrentRole(changeRoleDto, tokenRequest.user);
+    return this.rolesService.changeCurrentRole(
+      changeRoleDto,
+      tokenRequest.user,
+    );
   }
 
   @ApiResponse({

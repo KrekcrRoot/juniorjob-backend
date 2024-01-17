@@ -27,12 +27,14 @@ import { VacancyResponsesModule } from './vacancy-responses/vacancy-responses.mo
 import { VacancyResponse } from './vacancy-responses/vacancy-response.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { Notification } from './notifications/notification.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot({
       type: `postgres`,
       host: process.env.POSTGRES_HOST,

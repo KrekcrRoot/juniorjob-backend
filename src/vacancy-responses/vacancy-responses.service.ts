@@ -43,7 +43,9 @@ export class VacancyResponsesService {
   async findAllByVacancy(vacancy_uuid: string) {
     return this.vacancyResponseRepository.find({
       where: {
-        uuid: vacancy_uuid,
+        vacancy: {
+          uuid: vacancy_uuid,
+        },
         deleted: false,
       },
       relations: {
