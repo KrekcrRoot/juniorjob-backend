@@ -80,9 +80,25 @@ export class RolesService {
   }
 
   async findApplicantByFullName(full_name: string) {
-    const result = await this.findApplicantBySurname(full_name.split(' ')[0]);
-    result.concat(await this.findApplicantBySurname(full_name.split(' ')[1]));
-    return result;
+    const full_name_split = full_name.split(' ');
+    let result: Array<Applicant>;
+    if (full_name_split.length === 1) {
+      result = await this.findApplicantByName(full_name_split[0]);
+      (await this.findApplicantBySurname(full_name_split[0])).forEach((el) => {
+        if (!result.find((obj) => obj.uuid === el.uuid)) {
+          result.push(el);
+        }
+      });
+    } else {
+      result = await this.findApplicantByName(full_name_split[0]);
+      (await this.findApplicantBySurname(full_name_split[1])).forEach((el) => {
+        if (!result.find((obj) => obj.uuid === el.uuid)) {
+          result.push(el);
+        }
+      });
+    }
+
+    return [...new Set([...result])];
   }
 
   async findApplicant(applicant_uuid: string) {

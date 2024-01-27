@@ -8,18 +8,23 @@ import {
   Body,
   UseGuards,
   BadRequestException,
-  Query
+  Query,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation, ApiProperty,
+  ApiResponse,
+  ApiTags
+} from '@nestjs/swagger';
 import { Role } from './role.entity';
 import { Applicant } from './models/applicant-role.entity';
 import { Individual } from './models/individual-role.entity';
 import { LegalEntity } from './models/legal-role.entity';
 import { Moderator } from './models/moderator-role.entity';
-import { isUUID } from 'class-validator';
+import { IsNotEmpty, IsString, isUUID } from 'class-validator';
 import { ApplicantUpdateDto } from './dto/applicant-update.dto';
 import { IndividualUpdateDto } from './dto/individual-update.dto';
 import { LegalEntityUpdateDto } from './dto/legal-update.dto';
@@ -38,11 +43,19 @@ interface tokenRequest extends Request {
   user: UserJwtDto;
 }
 
+export class QueryDTO {
+  @ApiProperty({
+    example: 'Some Query',
+    description: 'Full name',
+  })
+  @IsString()
+  @IsNotEmpty()
+  query: string;
+}
 
 @ApiTags('Roles')
 @Controller('roles')
 export class RolesController {
-
   constructor(private rolesService: RolesService) {}
 
   @ApiResponse({
@@ -58,7 +71,7 @@ export class RolesController {
   findUserRole(@Param() params: any) {
     return this.rolesService.findUserRole(params.uuid);
   }
-  
+
   @ApiResponse({
     status: HttpStatus.OK,
     type: Role,
@@ -79,10 +92,9 @@ export class RolesController {
   })
   @ApiOperation({ summary: 'Return role by full name' })
   @Get('/applicant/search')
-  getSearchApplicant(@Query() query: any) {
-    return this.rolesService.findApplicantByFullName(query.fullName.trim());
+  getSearchApplicant(@Query() query: QueryDTO) {
+    return this.rolesService.findApplicantByFullName(query.query.trim());
   }
-
 
   @ApiResponse({
     status: HttpStatus.OK,
@@ -130,7 +142,7 @@ export class RolesController {
   findModerator(@Param() params: any) {
     return this.rolesService.findModerator(params.uuid);
   }
-  
+
   @ApiResponse({
     status: HttpStatus.OK,
     type: ChangeRoleResponse,
@@ -140,7 +152,10 @@ export class RolesController {
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @Put('/change')
-  changeCurrent(@Body() changeRoleDto: ChangeRoleDto, @Req() tokenRequest: TokenRequest) {
+  changeCurrent(
+    @Body() changeRoleDto: ChangeRoleDto,
+    @Req() tokenRequest: TokenRequest,
+  ) {
     return this.rolesService.changeCurrentRole(
       changeRoleDto,
       tokenRequest.user,
@@ -154,8 +169,7 @@ export class RolesController {
   })
   @ApiOperation({ summary: 'Return role by uuid' })
   @ApiBearerAuth()
-  @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(UserRole.Moderator)
+  @UseGuards(AccessTokenGuard)
   @Get(':uuid')
   findRole(@Param() params: any) {
     return this.rolesService.findRole(params.uuid);
@@ -170,9 +184,11 @@ export class RolesController {
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @Put('/applicant/:uuid')
-  updateApplicant(@Body() applicantDto: ApplicantUpdateDto, @Param() params: any) {
-
-    if(!isUUID(params.uuid)) {
+  updateApplicant(
+    @Body() applicantDto: ApplicantUpdateDto,
+    @Param() params: any,
+  ) {
+    if (!isUUID(params.uuid)) {
       throw new BadRequestException(responses.uuidNotValid);
     }
 
@@ -188,14 +204,15 @@ export class RolesController {
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @Put('/individual/:uuid')
-  updateIndividual(@Body() individualDto: IndividualUpdateDto, @Param() params: any) {
-
-    if(!isUUID(params.uuid)) {
+  updateIndividual(
+    @Body() individualDto: IndividualUpdateDto,
+    @Param() params: any,
+  ) {
+    if (!isUUID(params.uuid)) {
       throw new BadRequestException(responses.uuidNotValid);
     }
 
     return this.rolesService.updateIndividual(individualDto, params.uuid);
-
   }
 
   @ApiResponse({
@@ -207,14 +224,15 @@ export class RolesController {
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @Put('/legal-entity/:uuid')
-  updateLegalEntity(@Body() legalEntityDto: LegalEntityUpdateDto, @Param() params: any) {
-
-    if(!isUUID(params.uuid)) {
+  updateLegalEntity(
+    @Body() legalEntityDto: LegalEntityUpdateDto,
+    @Param() params: any,
+  ) {
+    if (!isUUID(params.uuid)) {
       throw new BadRequestException(responses.uuidNotValid);
     }
 
     return this.rolesService.updateLegalEntity(legalEntityDto, params.uuid);
-
   }
 
   @ApiResponse({
@@ -226,13 +244,14 @@ export class RolesController {
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
   @Put('/moderator/:uuid')
-  updateModerator(@Body() moderatorDto: ModeratorUpdateDto, @Param() params: any) {
-   
-    if(!isUUID(params.uuid)) {
+  updateModerator(
+    @Body() moderatorDto: ModeratorUpdateDto,
+    @Param() params: any,
+  ) {
+    if (!isUUID(params.uuid)) {
       throw new BadRequestException(responses.uuidNotValid);
     }
 
     return this.rolesService.updateModerator(moderatorDto, params.uuid);
-
   }
 }

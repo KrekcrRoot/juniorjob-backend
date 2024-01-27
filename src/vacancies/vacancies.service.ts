@@ -13,6 +13,8 @@ import { AllFilterDto } from 'src/users/dto/all-users-filter.dto';
 import { FilterProperties } from 'src/users/users.service';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
+import { SelectResponseDto } from './dto/select-response.dto';
+import { VacancyResponse } from '../vacancy-responses/vacancy-response.entity';
 
 export class AllFiltersSearchDto extends AllFilterDto {
   @ApiProperty({
@@ -30,6 +32,8 @@ export class VacanciesService {
     @InjectRepository(Vacancy) private vacancyRepository: Repository<Vacancy>,
     @InjectRepository(VacancyCategory)
     private vacancyCategoryRepository: Repository<VacancyCategory>,
+    @InjectRepository(VacancyResponse)
+    private vacancyResponseRepository: Repository<VacancyResponse>,
   ) {}
 
   async findByUUID(uuid: string): Promise<Vacancy | null> {
@@ -136,6 +140,37 @@ export class VacanciesService {
   async all(filters: AllFilterDto): Promise<Array<Vacancy> | null> {
     const query = this.makeQuery(filters);
     return await this.vacancyRepository.find(query);
+  }
+
+  async select(selectResponseDto: SelectResponseDto, employerUuid: string) {
+    const vacancyResponse = await this.vacancyResponseRepository.findOne({
+      where: {
+        uuid: selectResponseDto.vacancy_response,
+        deleted: false,
+      },
+      relations: {
+        vacancy: true,
+      },
+    });
+
+    let vacancy = await this.vacancyRepository.findOne({
+      where: {
+        uuid: vacancyResponse.vacancy.uuid,
+        deleted: false,
+        banned: false,
+      },
+      relations: {
+        employer: true,
+      }
+    });
+
+    if(vacancy.employer.uuid !== employerUuid) {
+      throw new ForbiddenException(responses.accessDenied);
+    }
+
+    vacancy.responseSelected = vacancyResponse.uuid;
+    return this.vacancyRepository.save(vacancy);
+
   }
 
   async ban(vacancy_uuid: string) {
@@ -246,6 +281,7 @@ export class VacanciesService {
       banned: vacancy.banned,
       created_at: vacancy.created_at,
       updated_at: new Date(),
+      responseSelected: vacancy.responseSelected,
       isClosedForResponse: vacancy.isClosedForResponse,
     };
 

@@ -2,13 +2,14 @@ import { User } from 'src/users/user.entity';
 import {
   Column,
   CreateDateColumn,
-  Entity,
-  ManyToOne,
+  Entity, JoinColumn,
+  ManyToOne, OneToOne,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { VacancyCategory } from './vacancy-category.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { VacancyResponse } from '../vacancy-responses/vacancy-response.entity';
 
 @Entity('Vacancies')
 export class Vacancy {
@@ -39,6 +40,10 @@ export class Vacancy {
   })
   @ManyToOne(() => VacancyCategory, (category) => category.uuid)
   category: VacancyCategory;
+
+  @ApiProperty()
+  @Column({ nullable: true })
+  responseSelected: string;
 
   @ApiProperty({
     example: '14:00 - 17:00 12.02.2023 - 24.02.2023',

@@ -28,6 +28,8 @@ import { VacancyResponse } from './vacancy-responses/vacancy-response.entity';
 import { NotificationsModule } from './notifications/notifications.module';
 import { Notification } from './notifications/notification.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ReviewsModule } from './reviews/reviews.module';
+import { Review } from './reviews/review.entity';
 
 @Module({
   imports: [
@@ -54,6 +56,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         VacancyCategory,
         VacancyResponse,
         Notification,
+        Review,
       ],
       synchronize: true,
     }),
@@ -65,6 +68,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ServerModule,
     VacancyResponsesModule,
     NotificationsModule,
+    ReviewsModule,
   ],
   controllers: [CoursesController, AuthController, StorageController],
   providers: [AuthService],

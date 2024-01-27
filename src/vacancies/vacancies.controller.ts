@@ -1,29 +1,24 @@
 import {
   BadRequestException,
-  UseInterceptors,
+  Body,
   Controller,
-  Post,
+  Delete,
+  ForbiddenException,
   Get,
   HttpStatus,
   Param,
-  UseGuards,
-  Body,
-  Req,
-  Delete,
+  Post,
   Put,
-  UploadedFile,
-  ForbiddenException,
   Query,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { AllFiltersSearchDto, VacanciesService } from './vacancies.service';
 import { Vacancy } from './vacancy.entity';
 import { isUUID } from 'class-validator';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { Roles } from 'src/roles/roles.decorator';
 import { RolesGuard } from 'src/roles/roles.guard';
@@ -41,6 +36,7 @@ import * as fs from 'fs';
 import { AllFilterDto } from 'src/users/dto/all-users-filter.dto';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
+import { SelectResponseDto } from './dto/select-response.dto';
 
 @ApiTags('Vacancies')
 @Controller('vacancies')
@@ -139,6 +135,13 @@ export class VacanciesController {
     return this.vacanciesService.editImage(req.uuid, fileRaw);
   }
 
+  @UseGuards(AccessTokenGuard)
+  @Roles(UserRole.LegalEntity, UserRole.Individual)
+  @Post('/selectResponse')
+  selectVacancy(@Body() selectResponseDto: SelectResponseDto, @Req() tokenRequest: TokenRequest) {
+    return this.vacanciesService.select(selectResponseDto, tokenRequest.user.uuid);
+  }
+
   // Put
 
   @ApiResponse({
@@ -210,7 +213,7 @@ export class VacanciesController {
   @ApiOperation({ summary: 'Return all vacancies of employer' })
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(UserRole.Individual, UserRole.LegalEntity)
+  @Roles(UserRole.Individual, UserRole.LegalEntity, UserRole.Moderator)
   @Get('/my')
   async getMy(@Req() req: TokenRequest) {
     const user = await this.usersService.findByUUID(req.user.uuid);
