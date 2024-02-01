@@ -19,11 +19,23 @@ import { UUIDVacancyDto } from 'src/vacancies/dto/uuid-vacancy.dto';
 import { UserUUID } from 'src/users/dto/user-uuid.dto';
 import {
   ApiBearerAuth,
-  ApiOperation,
+  ApiOperation, ApiProperty,
   ApiResponse,
-  ApiTags,
+  ApiTags
 } from '@nestjs/swagger';
 import { VacancyResponse } from './vacancy-response.entity';
+import { IsNotEmpty, IsString, IsUUID, MaxLength } from 'class-validator';
+
+export class VacancyResponseCreateDto extends UUIDVacancyDto {
+  @ApiProperty({
+    example: 'Lorem ipsum se dolor',
+    description: 'Vacancy response message',
+  })
+  @MaxLength(1024)
+  @IsString()
+  @IsNotEmpty()
+  message: string;
+}
 
 @ApiTags('Vacancy responses')
 @Controller('vacancies/response')
@@ -39,7 +51,7 @@ export class VacancyResponsesController {
   @Post('/create')
   @UseGuards(AccessTokenGuard, RolesGuard)
   @Roles(UserRole.Applicant, UserRole.Moderator)
-  respond(@Body() vacancyCreate: UUIDVacancyDto, @Req() tokens: TokenRequest) {
+  respond(@Body() vacancyCreate: VacancyResponseCreateDto, @Req() tokens: TokenRequest) {
     return this.vacancyResponseService.respond(vacancyCreate, tokens.user.uuid);
   }
 

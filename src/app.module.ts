@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CoursesController } from './courses/courses.controller';
 import * as process from 'process';
 import { UsersModule } from './users/users.module';
 import { CitiesModule } from './cities/cities.module';
@@ -30,6 +29,9 @@ import { Notification } from './notifications/notification.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ReviewsModule } from './reviews/reviews.module';
 import { Review } from './reviews/review.entity';
+import { ProfessionalTrialsModule } from './professional-trials/professional-trials.module';
+import { ProfessionalTrial } from './professional-trials/professional-trial.entity';
+import { ProfessionalTrialCategory } from './professional-trials/professional-trial-category.entity';
 
 @Module({
   imports: [
@@ -57,6 +59,8 @@ import { Review } from './reviews/review.entity';
         VacancyResponse,
         Notification,
         Review,
+        ProfessionalTrialCategory,
+        ProfessionalTrial,
       ],
       synchronize: true,
     }),
@@ -69,8 +73,9 @@ import { Review } from './reviews/review.entity';
     VacancyResponsesModule,
     NotificationsModule,
     ReviewsModule,
+    ProfessionalTrialsModule,
   ],
-  controllers: [CoursesController, AuthController, StorageController],
+  controllers: [AuthController, StorageController],
   providers: [AuthService],
 })
 export class AppModule {}

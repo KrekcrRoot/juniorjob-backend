@@ -7,7 +7,7 @@ import { VacanciesService } from 'src/vacancies/vacancies.service';
 import responses from 'src/global/responses';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { UUIDVacancyDto } from 'src/vacancies/dto/uuid-vacancy.dto';
+import { VacancyResponseCreateDto } from './vacancy-responses.controller';
 
 @Injectable()
 export class VacancyResponsesService {
@@ -56,7 +56,7 @@ export class VacancyResponsesService {
     });
   }
 
-  async respond(vacancyResponseCreate: UUIDVacancyDto, applicant_uuid: string) {
+  async respond(vacancyResponseCreate: VacancyResponseCreateDto, applicant_uuid: string) {
     const vacancy: Vacancy = await this.vacanciesService.findByUUID(
       vacancyResponseCreate.uuid,
     );
@@ -70,6 +70,7 @@ export class VacancyResponsesService {
     const vacancyResponse = this.vacancyResponseRepository.create({
       vacancy: vacancy,
       applicant: applicant,
+      message: vacancyResponseCreate.message,
     });
 
     return this.vacancyResponseRepository.save(vacancyResponse);

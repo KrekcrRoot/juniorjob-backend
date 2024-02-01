@@ -34,6 +34,13 @@ export class VacancyResponse {
   applicant: User;
 
   @ApiProperty({
+    example: 'Lorem ipsum se dolor',
+    description: 'Message of applicant to vacancy'
+  })
+  @Column()
+  message: string;
+
+  @ApiProperty({
     example: new Date(),
     description: 'Timestamp when user created',
   })
