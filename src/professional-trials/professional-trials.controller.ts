@@ -29,6 +29,7 @@ import { uploadFile } from '../global/uploadFile';
 import { join } from 'path';
 import constants from '../global/constants';
 import { ConfigService } from '@nestjs/config';
+import { StoreProfessionalCategoryDto } from './dto/professional-category-store.dto';
 
 @ApiTags('Professional trials')
 @Controller('professional-trials')
@@ -131,6 +132,18 @@ export class ProfessionalTrialCategoriesController {
   @Get('/all')
   all() {
     return this.professionalTrialCategories.all();
+  }
+
+
+  @ApiResponse({
+    description: 'Store professional trial category (only for moderator)',
+    type: ProfessionalTrialCategory,
+  })
+  @UseGuards(AccessTokenGuard)
+  @Roles(UserRole.Moderator)
+  @Post('/store')
+  store(storeProfessionalCategory: StoreProfessionalCategoryDto) {
+    return this.professionalTrialCategories.store(storeProfessionalCategory);
   }
 
 }
