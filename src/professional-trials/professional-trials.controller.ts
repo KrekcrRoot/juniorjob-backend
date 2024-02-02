@@ -6,7 +6,8 @@ import {
   HttpStatus,
   Post,
   Query,
-  Req, UploadedFile,
+  Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors
 } from '@nestjs/common';
@@ -87,7 +88,8 @@ export class ProfessionalTrialsController {
     return this.professionalService.respond(professionalTrialUUID, tokenRequest.user.uuid);
   }
 
-  // @UseGuards(AccessTokenGuard)
+  @UseGuards(AccessTokenGuard)
+  @Roles(UserRole.Moderator)
   @UseInterceptors(FileInterceptor('image'))
   @ApiBearerAuth()
   @Post('/uploadImage')

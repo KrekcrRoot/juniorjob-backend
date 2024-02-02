@@ -33,6 +33,10 @@ export class ProfessionalTrial {
   @JoinColumn()
   category: ProfessionalTrialCategory;
 
+  @ApiProperty({
+    example: '/url/to/img.jpg',
+    description: 'Url to professional trial preview',
+  })
   @Column({ default: 'default.png' })
   image: string;
 
