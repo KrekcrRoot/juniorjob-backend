@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpStatus,
+  Post,
+  Query,
+  Req, UploadedFile,
+  UseGuards,
+  UseInterceptors
+} from '@nestjs/common';
 import { ProfessionalTrialsService } from './professional-trials.service';
 import { AllProfessionalTrialsDto } from './dto/all-professional-trials.dto';
 import { AccessTokenGuard } from '../common/guards/accessToken.guard';
@@ -11,6 +22,12 @@ import { ProfessionalTrial } from './professional-trial.entity';
 import { ProfessionalTrialCategory } from './professional-trial-category.entity';
 import { ProfessionalTrialCategoriesService } from './professional-trial-categories.service';
 import { ProfessionalTrialsUuidDto } from './dto/professional-trials-uuid.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileTypeValidationPipe } from '../vacancies/vacancies.image.pipe';
+import { uploadFile } from '../global/uploadFile';
+import { join } from 'path';
+import constants from '../global/constants';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Professional trials')
 @Controller('professional-trials')
@@ -18,6 +35,7 @@ export class ProfessionalTrialsController {
 
   constructor(
     private professionalService: ProfessionalTrialsService,
+    private configService: ConfigService
   ) {}
 
   // Get
@@ -67,6 +85,18 @@ export class ProfessionalTrialsController {
   @Post('/respond')
   respond(@Req() tokenRequest: TokenRequest, @Body() professionalTrialUUID: ProfessionalTrialsUuidDto) {
     return this.professionalService.respond(professionalTrialUUID, tokenRequest.user.uuid);
+  }
+
+  // @UseGuards(AccessTokenGuard)
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiBearerAuth()
+  @Post('/uploadImage')
+  uploadImage(
+    @UploadedFile(new FileTypeValidationPipe()) file: Express.Multer.File,
+    @Body() professionalTrialsUuidDto: ProfessionalTrialsUuidDto,
+  ) {
+    const filePwd = uploadFile(file, join(this.configService.get<string>('STORAGE_FOLDER'), constants.professionalTrialsFolder));
+    return this.professionalService.updateImage(professionalTrialsUuidDto, filePwd);
   }
 
   // Delete

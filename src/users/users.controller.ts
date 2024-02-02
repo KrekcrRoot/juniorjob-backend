@@ -35,6 +35,7 @@ import { AllFilterDto } from './dto/all-users-filter.dto';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { ChangeEmailDto } from './dto/change-email.dto';
+import { uploadFile } from '../global/uploadFile';
 
 @ApiTags('Users')
 @Controller('users')
@@ -106,18 +107,8 @@ export class UsersController {
     @Req() auth: TokenRequest,
     @UploadedFile(new FileTypeValidationPipe()) file: Express.Multer.File,
   ) {
-    const filearr = file.originalname.split('.');
-    const type = filearr[filearr.length - 1];
-
-    const fileRaw = Date.now() + '.' + type;
-    const filePwd = join(
-      this.configService.get<string>('STORAGE_FOLDER'),
-      constants.usersFolder,
-      fileRaw,
-    );
-    fs.writeFileSync(filePwd, file.buffer);
-
-    return this.usersService.updateImage(auth.user.uuid, fileRaw);
+    const fileRes = uploadFile(file, join(this.configService.get<string>('STORAGE_FOLDER'), constants.usersFolder));
+    return this.usersService.updateImage(auth.user.uuid, fileRes);
   }
 
   @ApiResponse({

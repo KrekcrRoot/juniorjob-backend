@@ -8,6 +8,10 @@ import { ProfessionalTrialCategory } from './professional-trial-category.entity'
 import responses from '../global/responses';
 import { ProfessionalTrialsUuidDto } from './dto/professional-trials-uuid.dto';
 import { User } from '../users/user.entity';
+import { deleteFile } from '../global/deleteFile';
+import { join } from 'path';
+import { ConfigService } from '@nestjs/config';
+import constants from '../global/constants';
 
 @Injectable()
 export class ProfessionalTrialsService {
@@ -16,14 +20,15 @@ export class ProfessionalTrialsService {
     @InjectRepository(ProfessionalTrial) private professionalTrialsRepository: Repository<ProfessionalTrial>,
     @InjectRepository(ProfessionalTrialCategory) private professionalTrialsCategoryRepository: Repository<ProfessionalTrialCategory>,
     @InjectRepository(User) private usersRepository: Repository<User>,
+    private configService: ConfigService,
     ) {}
 
 //  Get
 
   async all(filters: AllProfessionalTrialsDto) {
     return this.professionalTrialsRepository.find({
-      take: filters.row,
-      skip: filters.row * filters.page,
+      take: filters.row ? filters.row : 20,
+      skip: (filters.row * filters.page) ? (filters.row * filters.page) : 0,
       where: {
         deleted: false,
         banned: false,
@@ -149,6 +154,30 @@ export class ProfessionalTrialsService {
       .relation(ProfessionalTrial, "user")
       .of(profTrial)
       .remove(user);
+
+  }
+
+  async updateImage(professionalTrialUUID: ProfessionalTrialsUuidDto, filePath: string) {
+
+    const profTrial = await this.professionalTrialsRepository.findOne({
+      where: {
+        uuid: professionalTrialUUID.professional_trial_uuid,
+        category: {
+          shadow: false,
+        },
+        banned: false,
+        deleted: false,
+      },
+    });
+
+    if(!profTrial) {
+      throw new BadRequestException(responses.doesntExistUUID('Professional trial'));
+    }
+
+    deleteFile(join(this.configService.get<string>('STORAGE_FOLDER'), constants.professionalTrialsFolder, profTrial.image));
+
+    profTrial.image = filePath;
+    return this.professionalTrialsRepository.save(profTrial);
 
   }
 

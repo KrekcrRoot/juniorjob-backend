@@ -32,6 +32,7 @@ import { Review } from './reviews/review.entity';
 import { ProfessionalTrialsModule } from './professional-trials/professional-trials.module';
 import { ProfessionalTrial } from './professional-trials/professional-trial.entity';
 import { ProfessionalTrialCategory } from './professional-trials/professional-trial-category.entity';
+import { StorageService } from './storage/storage.service';
 
 @Module({
   imports: [
@@ -76,6 +77,6 @@ import { ProfessionalTrialCategory } from './professional-trials/professional-tr
     ProfessionalTrialsModule,
   ],
   controllers: [AuthController, StorageController],
-  providers: [AuthService],
+  providers: [AuthService, StorageService],
 })
 export class AppModule {}

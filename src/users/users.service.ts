@@ -16,6 +16,10 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationEnum } from '../notifications/notification.enum';
 import notifications from '../global/notifications';
 import { ChangeEmailDto } from './dto/change-email.dto';
+import { deleteFile } from '../global/deleteFile';
+import { ConfigService } from '@nestjs/config';
+import { join } from 'path';
+import constants from '../global/constants';
 
 export interface FilterProperties {
   [key: string]: any;
@@ -35,6 +39,7 @@ export class UsersService {
     private moderatorRepository: Repository<Moderator>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
     private notificationsService: NotificationsService,
+    private configService: ConfigService,
   ) {}
 
   async getAllUsers(filters: AllFilterDto) {
@@ -276,6 +281,12 @@ export class UsersService {
     if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
+
+    deleteFile(join(
+      this.configService.get<string>('STORAGE_FOLDER'),
+      constants.usersFolder,
+      user.image,
+    ))
 
     user.image = image;
 
