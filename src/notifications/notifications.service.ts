@@ -1,17 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './notification.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { User } from '../users/user.entity';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
-export class NotificationsService {
+export class NotificationsService implements OnModuleInit {
+
+  notificationsTimeout: number;
+
   constructor(
     @InjectRepository(Notification)
     private notificationsRepository: Repository<Notification>,
     private readonly schedulerRegistry: SchedulerRegistry,
+    private configService: ConfigService,
   ) {}
 
   async getByUUID(uuid: string) {
@@ -36,6 +41,10 @@ export class NotificationsService {
     });
   }
 
+  createSync(createNotificationDto: CreateNotificationDto) {
+    this.create(createNotificationDto).then();
+  }
+
   async create(
     createNotificationDto: CreateNotificationDto,
   ): Promise<Notification> {
@@ -50,7 +59,7 @@ export class NotificationsService {
       this.schedulerRegistry.deleteTimeout(`${res.uuid}`);
     };
 
-    const timeout = setTimeout(callback, 60 * 1000);
+    const timeout = setTimeout(callback, this.notificationsTimeout);
     this.schedulerRegistry.addTimeout(`${res.uuid}`, timeout);
 
     return res;
@@ -70,5 +79,12 @@ export class NotificationsService {
 
   async all() {
     return this.notificationsRepository.find();
+  }
+
+  onModuleInit(): void {
+
+    const days = this.configService.get<number>('NOTIFICATION_TIMEOUT');
+    this.notificationsTimeout = days * 24 * 60 * 60 * 1000;
+
   }
 }

@@ -30,7 +30,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserUUID } from './dto/user-uuid.dto';
 import { FileTypeValidationPipe } from 'src/vacancies/vacancies.image.pipe';
 import constants from 'src/global/constants';
-import * as fs from 'fs';
 import { AllFilterDto } from './dto/all-users-filter.dto';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
@@ -176,7 +175,8 @@ export class UsersController {
   @UseGuards(AccessTokenGuard, RolesGuard)
   @ApiBearerAuth()
   @Roles(UserRole.Moderator)
-  delete(@Body() userUUID: UserUUID) {
-    this.usersService.delete(userUUID.uuid);
+  async delete(@Body() userUUID: UserUUID) {
+    await this.usersService.delete(userUUID.uuid);
+    return HttpStatus.OK;
   }
 }

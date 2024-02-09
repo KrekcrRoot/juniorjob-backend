@@ -105,6 +105,26 @@ export class UsersService {
     return user;
   }
 
+  async findWithRelation(user_uuid: string): Promise<User | null> {
+    const user = await this.usersRepository.findOne({
+      where: {
+        uuid: user_uuid,
+      },
+      relations: {
+        city: true,
+        role: {
+          applicant: true,
+          individual: true,
+          legal_entity: true,
+          moderator: true,
+        },
+      }
+    });
+
+    if (!user || user.deleted) return null;
+    return user;
+  }
+
   async findByUUID(user_uuid: string): Promise<User | null> {
     const user = await this.usersRepository.findOne({
       where: {
@@ -113,7 +133,7 @@ export class UsersService {
       relations: {
         city: true,
         role: true,
-      },
+      }
     });
 
     if (!user || user.deleted) return null;
@@ -296,11 +316,13 @@ export class UsersService {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
 
-    deleteFile(join(
-      this.configService.get<string>('STORAGE_FOLDER'),
-      constants.usersFolder,
-      user.image,
-    ))
+    if(user.image !== 'image.png') {
+      deleteFile(join(
+        this.configService.get<string>('STORAGE_FOLDER'),
+        constants.usersFolder,
+        user.image,
+      ))
+    }
 
     user.image = image;
 

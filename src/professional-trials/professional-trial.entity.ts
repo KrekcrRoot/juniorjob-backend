@@ -75,6 +75,14 @@ export class ProfessionalTrial {
   user: User[];
 
   @ApiProperty({
+    example: '534e8400-e29b-41d4-a716-446655440000',
+    description: 'employer of Professional Trial',
+  })
+  @ManyToOne(() => User, (employer) => employer.uuid)
+  @JoinColumn()
+  employer: User;
+
+  @ApiProperty({
     example: new Date(),
     description: 'Timestamp when trial created',
   })

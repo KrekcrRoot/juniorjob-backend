@@ -64,7 +64,7 @@ export class ProfessionalTrialsService {
 
 //   Work with data
 
-  async store(storeDto: ProfessionalTrialsStoreDto) {
+  async store(storeDto: ProfessionalTrialsStoreDto, user_uuid: string) {
 
     const category = await this.professionalTrialsCategoryRepository.findOne({
       where: {
@@ -77,12 +77,25 @@ export class ProfessionalTrialsService {
       throw new BadRequestException(responses.doesntExistUUID('Professional category'))
     }
 
+    const user = await this.usersRepository.findOne({
+      where: {
+        uuid: user_uuid,
+        deleted: false,
+        banned: false,
+      },
+    })
+
+    if(!user) {
+      throw new BadRequestException(responses.doesntExistUUID('User'));
+    }
+
     const professionalTrial = this.professionalTrialsRepository.create({
       category: category,
       title: storeDto.title,
       place: storeDto.place,
       time: storeDto.time,
       date: storeDto.date,
+      employer: user,
     });
 
     return this.professionalTrialsRepository.save(professionalTrial);

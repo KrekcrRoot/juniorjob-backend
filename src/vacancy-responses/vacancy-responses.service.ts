@@ -1,13 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { VacancyResponse } from './vacancy-response.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Vacancy } from 'src/vacancies/vacancy.entity';
-import { VacanciesService } from 'src/vacancies/vacancies.service';
-import responses from 'src/global/responses';
-import { User } from 'src/users/user.entity';
-import { UsersService } from 'src/users/users.service';
-import { VacancyResponseCreateDto } from './vacancy-responses.controller';
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { Repository } from "typeorm";
+import { VacancyResponse } from "./vacancy-response.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Vacancy } from "src/vacancies/vacancy.entity";
+import { VacanciesService } from "src/vacancies/vacancies.service";
+import responses from "src/global/responses";
+import { User } from "src/users/user.entity";
+import { UsersService } from "src/users/users.service";
+import { VacancyResponseCreateDto } from "./vacancy-responses.controller";
+import { NotificationsService } from "../notifications/notifications.service";
+import { NotificationEnum } from "../notifications/notification.enum";
+import notifications from "../global/notifications";
 
 @Injectable()
 export class VacancyResponsesService {
@@ -16,6 +19,7 @@ export class VacancyResponsesService {
     private vacancyResponseRepository: Repository<VacancyResponse>,
     private vacanciesService: VacanciesService,
     private usersService: UsersService,
+    private notificationService: NotificationsService,
   ) {}
 
   async findByUUID(uuid: string) {
@@ -63,9 +67,15 @@ export class VacancyResponsesService {
     if (!vacancy)
       throw new BadRequestException(responses.doesntExistUUID('Vacancy'));
 
-    const applicant: User = await this.usersService.findByUUID(applicant_uuid);
+    const applicant: User = await this.usersService.findWithRelation(applicant_uuid);
     if (!applicant)
       throw new BadRequestException(responses.doesntExistUUID('Applicant'));
+
+    this.notificationService.createSync({
+      user: vacancy.employer,
+      type: NotificationEnum.Applied,
+      body: notifications.vacancyResponse(applicant.role.applicant.name, vacancy.title),
+    })
 
     const vacancyResponse = this.vacancyResponseRepository.create({
       vacancy: vacancy,

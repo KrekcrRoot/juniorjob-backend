@@ -72,10 +72,10 @@ export class ProfessionalTrialsController {
   })
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
-  @Roles(UserRole.Moderator)
+  @Roles(UserRole.Moderator, UserRole.LegalEntity, UserRole.Individual)
   @Post('/store')
-  store(@Body() professionalTrialsDto: ProfessionalTrialsStoreDto) {
-    return this.professionalService.store(professionalTrialsDto);
+  store(@Req() tokenRequest: TokenRequest, @Body() professionalTrialsDto: ProfessionalTrialsStoreDto) {
+    return this.professionalService.store(professionalTrialsDto, tokenRequest.user.uuid);
   }
 
   @ApiResponse({

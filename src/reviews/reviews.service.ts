@@ -6,7 +6,6 @@ import { ReviewStoreDto } from './dto/review-store.dto';
 import { User } from '../users/user.entity';
 import { Applicant } from '../roles/models/applicant-role.entity';
 import responses from '../global/responses';
-import { all } from 'axios';
 
 @Injectable()
 export class ReviewsService {
@@ -71,6 +70,10 @@ export class ReviewsService {
         count++;
       }
     });
+
+    if(count == 0) {
+      return MarkEnum.Empty;
+    }
 
     return Math.round(allMarks / count);
   }
