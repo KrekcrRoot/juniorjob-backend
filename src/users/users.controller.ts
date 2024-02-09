@@ -92,8 +92,6 @@ export class UsersController {
     description: 'Find user by UUID',
   })
   @ApiOperation({ summary: 'Find user by UUID' })
-  @ApiBearerAuth()
-  @UseGuards(AccessTokenGuard)
   @Get(':uuid')
   findByUUID(@Param() params: any): Promise<User | null> {
     return this.usersService.findByUUID(params.uuid);
