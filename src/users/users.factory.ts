@@ -34,6 +34,7 @@ export class UsersFactory {
 
       user.role.applicant = {
         uuid: user.role.applicant.uuid,
+        user_uuid: user.uuid,
         name: faker.person.firstName(),
         surname: faker.person.lastName(),
         birthday: faker.date.birthdate(),

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from "@nestjs/common";
 import { AllProfessionalTrialsDto } from './dto/all-professional-trials.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfessionalTrial } from './professional-trial.entity';
@@ -154,6 +154,21 @@ export class ProfessionalTrialsService {
       .relation(ProfessionalTrial, "user")
       .of(profTrial)
       .remove(user);
+
+  }
+
+  async deleteProfessionalTrial(professionalTrialUUID: ProfessionalTrialsUuidDto) {
+
+    const professionalTrial = await this.professionalTrialsRepository.findOne({
+      where: {
+        uuid: professionalTrialUUID.professional_trial_uuid,
+        deleted: false,
+      }
+    });
+
+    professionalTrial.deleted = true;
+    await this.professionalTrialsRepository.save(professionalTrial);
+    return HttpStatus.OK;
 
   }
 

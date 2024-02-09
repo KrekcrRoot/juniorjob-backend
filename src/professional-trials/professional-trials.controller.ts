@@ -10,26 +10,26 @@ import {
   UploadedFile,
   UseGuards,
   UseInterceptors
-} from '@nestjs/common';
-import { ProfessionalTrialsService } from './professional-trials.service';
-import { AllProfessionalTrialsDto } from './dto/all-professional-trials.dto';
-import { AccessTokenGuard } from '../common/guards/accessToken.guard';
-import { Roles } from '../roles/roles.decorator';
-import { UserRole } from '../roles/role.enum';
-import { ProfessionalTrialsStoreDto } from './dto/professional-trials-store.dto';
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { TokenRequest } from '../users/dto/token-request';
-import { ProfessionalTrial } from './professional-trial.entity';
-import { ProfessionalTrialCategory } from './professional-trial-category.entity';
-import { ProfessionalTrialCategoriesService } from './professional-trial-categories.service';
-import { ProfessionalTrialsUuidDto } from './dto/professional-trials-uuid.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { FileTypeValidationPipe } from '../vacancies/vacancies.image.pipe';
-import { uploadFile } from '../global/uploadFile';
-import { join } from 'path';
-import constants from '../global/constants';
-import { ConfigService } from '@nestjs/config';
-import { StoreProfessionalCategoryDto } from './dto/professional-category-store.dto';
+} from "@nestjs/common";
+import { ProfessionalTrialsService } from "./professional-trials.service";
+import { AllProfessionalTrialsDto } from "./dto/all-professional-trials.dto";
+import { AccessTokenGuard } from "../common/guards/accessToken.guard";
+import { Roles } from "../roles/roles.decorator";
+import { UserRole } from "../roles/role.enum";
+import { ProfessionalTrialsStoreDto } from "./dto/professional-trials-store.dto";
+import { ApiBearerAuth, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { TokenRequest } from "../users/dto/token-request";
+import { ProfessionalTrial } from "./professional-trial.entity";
+import { ProfessionalTrialCategory } from "./professional-trial-category.entity";
+import { ProfessionalTrialCategoriesService } from "./professional-trial-categories.service";
+import { ProfessionalTrialsUuidDto } from "./dto/professional-trials-uuid.dto";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { FileTypeValidationPipe } from "../vacancies/vacancies.image.pipe";
+import { uploadFile } from "../global/uploadFile";
+import { join } from "path";
+import constants from "../global/constants";
+import { ConfigService } from "@nestjs/config";
+import { StoreProfessionalCategoryDto } from "./dto/professional-category-store.dto";
 
 @ApiTags('Professional trials')
 @Controller('professional-trials')
@@ -110,9 +110,21 @@ export class ProfessionalTrialsController {
   })
   @ApiBearerAuth()
   @UseGuards(AccessTokenGuard)
-  @Delete()
+  @Delete('/respond')
   deleteRespond(@Req() tokenRequest: TokenRequest, @Body() professionalTrialUUID: ProfessionalTrialsUuidDto) {
     return this.professionalService.deleteRespond(professionalTrialUUID, tokenRequest.user.uuid);
+  }
+
+  @ApiResponse({
+    description: 'Delete professional trial',
+    status: HttpStatus.OK,
+  })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Roles(UserRole.Moderator)
+  @Delete()
+  deleteProfessionalTrial(@Body() professionalTrialUUID: ProfessionalTrialsUuidDto) {
+    return this.professionalService.deleteProfessionalTrial(professionalTrialUUID);
   }
 
 }

@@ -143,6 +143,11 @@ export class RolesController {
     return this.rolesService.findModerator(params.uuid);
   }
 
+  @Get('/roles/root/:uuid')
+  findUserByRole(@Param() params: any) {
+    return this.rolesService.findUserByRole(params.uuid);
+  }
+
   @ApiResponse({
     status: HttpStatus.OK,
     type: ChangeRoleResponse,

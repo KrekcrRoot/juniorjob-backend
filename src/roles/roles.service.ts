@@ -145,6 +145,16 @@ export class RolesService {
     return legal_entity;
   }
 
+  async findUserByRole(role_uuid: string) {
+
+    const applicant = await this.applicantRepository.findOne({
+      where: {
+        uuid: role_uuid,
+      },
+    });
+
+  }
+
   // Updating roles
 
   async updateApplicant(
@@ -161,6 +171,7 @@ export class RolesService {
 
     role = {
       uuid: role.uuid,
+      user_uuid: role.user_uuid,
       ...applicantDto,
     };
 
@@ -181,6 +192,7 @@ export class RolesService {
 
     role = {
       uuid: role.uuid,
+      user_uuid: role.user_uuid,
       ...individualDto,
     };
 
@@ -201,6 +213,7 @@ export class RolesService {
 
     role = {
       uuid: role.uuid,
+      user_uuid: role.user_uuid,
       ...legalEntityDto,
     };
 
@@ -221,6 +234,7 @@ export class RolesService {
 
     role = {
       uuid: role.uuid,
+      user_uuid: role.user_uuid,
       ...moderatorDto,
     };
 

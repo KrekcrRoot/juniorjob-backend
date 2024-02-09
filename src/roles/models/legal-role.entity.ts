@@ -12,6 +12,13 @@ export class LegalEntity {
   uuid: string;
 
   @ApiProperty({
+    example: '456d9574-ed8d-4cd1-ab54-1a0e0d72829d',
+    description: 'User uuid',
+  })
+  @Column({ nullable: true })
+  user_uuid: string;
+
+  @ApiProperty({
     example: 'title',
     description: 'Legal entity company title',
   })

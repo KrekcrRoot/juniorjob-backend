@@ -151,7 +151,21 @@ export class UsersService {
     user.role = user_role;
 
     // Returning user
-    return await this.usersRepository.save(user);
+    const userRes = await this.usersRepository.save(user);
+
+    applicant.user_uuid = userRes.uuid;
+    individual.user_uuid = userRes.uuid;
+    legal_entity.user_uuid = userRes.uuid;
+    moderator.user_uuid = userRes.uuid;
+
+    (() => {
+      this.applicantRepository.save(applicant);
+      this.individualRepository.save(individual);
+      this.legalEntityRepository.save(legal_entity);
+      this.moderatorRepository.save(moderator);
+    })()
+
+    return userRes;
   }
 
   async saveUser(user: User): Promise<User> {
