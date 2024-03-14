@@ -39,6 +39,9 @@ export class ProfessionalTrialsService {
       order: {
         created_at: 'ASC',
       },
+      relations: {
+        category: true,
+      },
     });
   }
 

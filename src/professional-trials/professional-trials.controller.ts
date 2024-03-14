@@ -154,7 +154,7 @@ export class ProfessionalTrialCategoriesController {
   @UseGuards(AccessTokenGuard)
   @Roles(UserRole.Moderator)
   @Post('/store')
-  store(storeProfessionalCategory: StoreProfessionalCategoryDto) {
+  store(@Body() storeProfessionalCategory: StoreProfessionalCategoryDto) {
     return this.professionalTrialCategories.store(storeProfessionalCategory);
   }
 

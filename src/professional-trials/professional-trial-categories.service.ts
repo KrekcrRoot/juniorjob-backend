@@ -21,7 +21,7 @@ export class ProfessionalTrialCategoriesService {
 
   async store(storeProfessionalCategory: StoreProfessionalCategoryDto) {
     const profTrialCategory = this.professionalTrialCategories.create({
-      ...storeProfessionalCategory,
+      title: storeProfessionalCategory.title,
     });
 
     return this.professionalTrialCategories.save(profTrialCategory);
