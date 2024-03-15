@@ -3,4 +3,5 @@ export default {
   vacanciesCategoryFolder: '/vacanciesCategory/',
   usersFolder: '/users/',
   professionalTrialsFolder: '/professionalTrials/',
+  articlesFolder: '/articles/',
 };

@@ -68,4 +68,17 @@ export class StorageController {
 
     return this.storageService.streamFile(join(profPath, params.filename), res);
   }
+
+  @Get('/articles/:filename')
+  getArticleImage(
+    @Param() params: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const articlesPath = join(
+      this.configService.get<string>('STORAGE_FOLDER'),
+      constants.articlesFolder,
+    );
+
+    return this.storageService.streamFile(join(articlesPath, params.filename), res);
+  }
 }

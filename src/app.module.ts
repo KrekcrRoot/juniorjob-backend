@@ -34,6 +34,7 @@ import { ProfessionalTrial } from './professional-trials/professional-trial.enti
 import { ProfessionalTrialCategory } from './professional-trials/professional-trial-category.entity';
 import { StorageService } from './storage/storage.service';
 import { ArticlesModule } from './articles/articles.module';
+import { Article } from "./articles/article.entity";
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ArticlesModule } from './articles/articles.module';
         Review,
         ProfessionalTrialCategory,
         ProfessionalTrial,
+        Article,
       ],
       synchronize: true,
     }),
