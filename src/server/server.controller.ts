@@ -18,6 +18,7 @@ export class ServerController {
       () => this.http.pingCheck('internet', 'https://8.8.8.8'),
       () => this.http.pingCheck('api', 'https://api.junior-job.ru/server/ping'),
       () => this.http.pingCheck('frontend', 'https://junior-job.ru'),
+      () => this.http.pingCheck('chat api', 'https://chatapi.junior-job.ru')
     ]);
   }
 

@@ -1,11 +1,12 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Notification } from './notification.entity';
-import { CreateNotificationDto } from './dto/create-notification.dto';
-import { User } from '../users/user.entity';
-import { SchedulerRegistry } from '@nestjs/schedule';
+import { BadRequestException, Injectable, OnModuleInit } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Notification } from "./notification.entity";
+import { CreateNotificationDto } from "./dto/create-notification.dto";
+import { User } from "../users/user.entity";
+import { SchedulerRegistry } from "@nestjs/schedule";
 import { ConfigService } from "@nestjs/config";
+import responses from "../global/responses";
 
 @Injectable()
 export class NotificationsService implements OnModuleInit {
@@ -20,12 +21,16 @@ export class NotificationsService implements OnModuleInit {
   ) {}
 
   async getByUUID(uuid: string) {
-    return this.notificationsRepository.findOne({
+    const notification = await this.notificationsRepository.findOne({
       where: {
         uuid: uuid,
         deleted: false,
       },
     });
+
+    if(!notification) throw new BadRequestException(responses.doesntExistUUID('Notification'));
+
+    return notification;
   }
 
   async getByUser(user: User) {
@@ -52,21 +57,19 @@ export class NotificationsService implements OnModuleInit {
       ...createNotificationDto,
     });
 
-    const res = await this.notificationsRepository.save(notification);
-
-    const callback = () => {
-      this.notificationsRepository.delete(res.uuid);
-      this.schedulerRegistry.deleteTimeout(`${res.uuid}`);
-    };
-
-    const timeout = setTimeout(callback, this.notificationsTimeout);
-    this.schedulerRegistry.addTimeout(`${res.uuid}`, timeout);
-
-    return res;
+    return await this.notificationsRepository.save(notification);
   }
 
   async viewed(notification: Notification): Promise<Notification> {
     notification.viewed = true;
+    const callback = () => {
+      this.notificationsRepository.delete(notification.uuid);
+      this.schedulerRegistry.deleteTimeout(`${notification.uuid}`);
+    };
+
+    const timeout = setTimeout(callback, this.notificationsTimeout);
+    this.schedulerRegistry.addTimeout(`${notification.uuid}`, timeout);
+
     return this.notificationsRepository.save(notification);
   }
 
