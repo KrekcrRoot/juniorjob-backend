@@ -12,6 +12,7 @@ import { deleteFile } from '../global/deleteFile';
 import { join } from 'path';
 import { ConfigService } from '@nestjs/config';
 import constants from '../global/constants';
+import { UuidProfessionalTrialDto } from "./dto/uuid-professional-trial.dto";
 
 @Injectable()
 export class ProfessionalTrialsService {
@@ -24,6 +25,22 @@ export class ProfessionalTrialsService {
     ) {}
 
 //  Get
+
+  async uuid(uuid: UuidProfessionalTrialDto) {
+    return this.professionalTrialsRepository.findOne({
+      where: {
+        uuid: uuid.uuid,
+        category: {
+          shadow: false,
+        },
+        banned: false,
+        deleted: false,
+      },
+      relations: {
+        category: true,
+      }
+    });
+  }
 
   async all(filters: AllProfessionalTrialsDto) {
     return this.professionalTrialsRepository.find({
@@ -210,6 +227,43 @@ export class ProfessionalTrialsService {
     profTrial.image = filePath;
     return this.professionalTrialsRepository.save(profTrial);
 
+  }
+
+  async edit(professionalTrialUUID: UuidProfessionalTrialDto, editDto: ProfessionalTrialsStoreDto) {
+    const profTrial = await this.professionalTrialsRepository.findOne({
+      where: {
+        uuid: professionalTrialUUID.uuid,
+        category: {
+          shadow: false,
+        },
+        banned: false,
+        deleted: false,
+      },
+      relations: {
+        category: true,
+      }
+    });
+
+    if(!profTrial) throw new BadRequestException(responses.doesntExistUUID('Professional trial'));
+
+    const category = await this.professionalTrialsCategoryRepository.findOne({
+      where: {
+        shadow: false,
+        uuid: editDto.category_uuid,
+      },
+    });
+
+    if(!category) {
+      throw new BadRequestException(responses.doesntExistUUID('Professional category'))
+    }
+
+    profTrial.category = category;
+    profTrial.title = editDto.title;
+    profTrial.place = editDto.place;
+    profTrial.time = editDto.time;
+    profTrial.date = editDto.date;
+
+    return this.professionalTrialsRepository.save(profTrial);
   }
 
 }

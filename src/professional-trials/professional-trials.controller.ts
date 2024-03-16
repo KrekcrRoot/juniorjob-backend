@@ -3,8 +3,8 @@ import {
   Controller,
   Delete,
   Get,
-  HttpStatus,
-  Post,
+  HttpStatus, Param,
+  Post, Put,
   Query,
   Req,
   UploadedFile,
@@ -30,6 +30,7 @@ import { join } from "path";
 import constants from "../global/constants";
 import { ConfigService } from "@nestjs/config";
 import { StoreProfessionalCategoryDto } from "./dto/professional-category-store.dto";
+import { UuidProfessionalTrialDto } from "./dto/uuid-professional-trial.dto";
 
 @ApiTags('Professional trials')
 @Controller('professional-trials')
@@ -62,6 +63,15 @@ export class ProfessionalTrialsController {
   @Get('/my')
   getMy(@Req() tokenRequest: TokenRequest) {
     return this.professionalService.byUser(tokenRequest.user.uuid);
+  }
+
+  @ApiResponse({
+    description: 'Professional trial',
+    type: ProfessionalTrial,
+  })
+  @Get(':uuid')
+  getByUuid(@Param() uuid: UuidProfessionalTrialDto) {
+    return this.professionalService.uuid(uuid);
   }
 
   // Post
@@ -125,6 +135,18 @@ export class ProfessionalTrialsController {
   @Delete()
   deleteProfessionalTrial(@Body() professionalTrialUUID: ProfessionalTrialsUuidDto) {
     return this.professionalService.deleteProfessionalTrial(professionalTrialUUID);
+  }
+
+  @ApiResponse({
+    description: 'Edit professional trial',
+    type: ProfessionalTrial,
+  })
+  @ApiBearerAuth()
+  @UseGuards(AccessTokenGuard)
+  @Roles(UserRole.Moderator, UserRole.LegalEntity, UserRole.Individual)
+  @Put(':uuid')
+  edit(@Param() profTrialUuid: UuidProfessionalTrialDto, @Body() editDto: ProfessionalTrialsStoreDto) {
+    return this.professionalService.edit(profTrialUuid, editDto);
   }
 
 }
