@@ -66,6 +66,15 @@ export class ProfessionalTrialsController {
   }
 
   @ApiResponse({
+    description: 'Get all users by prof trial',
+    type: ProfessionalTrial,
+  })
+  @Get('/users/:uuid')
+  getAllUsers(@Param() uuid: UuidProfessionalTrialDto) {
+    return this.professionalService.allUsers(uuid);
+  }
+
+  @ApiResponse({
     description: 'Professional trial',
     type: ProfessionalTrial,
   })

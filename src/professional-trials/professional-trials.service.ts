@@ -62,6 +62,16 @@ export class ProfessionalTrialsService {
     });
   }
 
+  async allUsers(uuid: UuidProfessionalTrialDto) {
+    const profTrial = await this.uuid(uuid);
+
+    return this.professionalTrialsRepository
+      .createQueryBuilder()
+      .relation(ProfessionalTrial, "user")
+      .of(profTrial)
+      .loadMany<User>()
+  }
+
   async byUser(user_uuid: string) {
 
     return this.professionalTrialsRepository.find({
