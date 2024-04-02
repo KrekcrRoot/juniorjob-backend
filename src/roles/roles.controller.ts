@@ -65,8 +65,7 @@ export class RolesController {
   })
   @ApiOperation({ summary: 'Return role by user uuid' })
   @ApiBearerAuth()
-  @UseGuards(AccessTokenGuard, RolesGuard)
-  @Roles(UserRole.Moderator)
+  @UseGuards(AccessTokenGuard)
   @Get('/user/:uuid')
   findUserRole(@Param() params: any) {
     return this.rolesService.findUserRole(params.uuid);
