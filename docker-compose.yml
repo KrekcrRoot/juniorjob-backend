@@ -6,9 +6,9 @@ services:
     restart: always
     environment:
       - POSTGRES_PASSWORD=root
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=junior
       - POSTGRES_PORT=5433
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=backend
     container_name: postgres
     ports:
       - 5433:5433
