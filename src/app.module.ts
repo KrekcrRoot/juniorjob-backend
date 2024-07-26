@@ -35,6 +35,8 @@ import { ProfessionalTrialCategory } from './professional-trials/professional-tr
 import { StorageService } from './storage/storage.service';
 import { ArticlesModule } from './articles/articles.module';
 import { Article } from "./articles/article.entity";
+import { CompetenciesModule } from './competencies/competencies.module';
+import { Competence } from './competencies/competence.entity';
 
 @Module({
   imports: [
@@ -52,6 +54,7 @@ import { Article } from "./articles/article.entity";
       entities: [
         User,
         City,
+        Competence,
         Role,
         Applicant,
         Individual,
@@ -70,6 +73,7 @@ import { Article } from "./articles/article.entity";
     }),
     UsersModule,
     CitiesModule,
+    CompetenciesModule,
     AuthModule,
     RolesModule,
     VacanciesModule,

@@ -8,9 +8,11 @@ import { Moderator } from './models/moderator-role.entity';
 import { RolesService } from './roles.service';
 import { User } from 'src/users/user.entity';
 import { RolesController } from './roles.controller';
+import { CompetenciesModule } from '../competencies/competencies.module';
 
 @Module({
   imports: [
+    CompetenciesModule,
     TypeOrmModule.forFeature([
       Role,
       Applicant,

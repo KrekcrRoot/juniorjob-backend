@@ -18,6 +18,8 @@ import { ModeratorUpdateDto } from './dto/moderator-update.dto';
 import { ChangeRoleDto } from './dto/change-role.dto';
 import { UserJwtDto } from 'src/users/dto/user-jwt.dto';
 import responses from 'src/global/responses';
+import { CompetenciesService } from '../competencies/competencies.service';
+import { Competence } from '../competencies/competence.entity';
 
 @Injectable()
 export class RolesService {
@@ -32,6 +34,7 @@ export class RolesService {
     @InjectRepository(Moderator)
     private moderatorRepository: Repository<Moderator>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
+    private competenciesService: CompetenciesService,
   ) {}
 
   async findUserRole(user_uuid: string) {
@@ -55,7 +58,9 @@ export class RolesService {
         uuid: role_uuid,
       },
       relations: {
-        applicant: true,
+        applicant: {
+          competencies: true,
+        },
         individual: true,
         legal_entity: true,
         moderator: true,
@@ -102,8 +107,13 @@ export class RolesService {
   }
 
   async findApplicant(applicant_uuid: string) {
-    const applicant = await this.applicantRepository.findOneBy({
-      uuid: applicant_uuid,
+    const applicant = await this.applicantRepository.findOne({
+      where: {
+        uuid: applicant_uuid,
+      },
+      relations: {
+        competencies: true,
+      },
     });
 
     if (!applicant)
@@ -169,9 +179,18 @@ export class RolesService {
       throw new BadRequestException(responses.doesntExistUUID('Role'));
     }
 
+    let competencies: Competence[] = [];
+
+    for (const title of applicantDto.competencies_titles) {
+      const competence = await this.competenciesService.findByTitle(title);
+
+      if (competence) competencies.push(competence);
+    }
+
     role = {
       uuid: role.uuid,
       user_uuid: role.user_uuid,
+      competencies: competencies,
       ...applicantDto,
     };
 

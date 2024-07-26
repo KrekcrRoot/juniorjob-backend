@@ -40,13 +40,14 @@ export class UsersFactory {
         birthday: faker.date.birthdate(),
         study_place: faker.location.streetAddress(),
         inn: faker.number.int({min: 100000000000, max: 999999999999}).toString(),
-        competitions: '[\'programming\']',
+        // competitions: '[\'programming\']',
+        competencies: [],
         summary: '',
         created_at: user.role.applicant.created_at,
         updated_at: date,
       }
 
-      this.rolesService.updateApplicant(user.role.applicant as ApplicantUpdateDto, user.role.applicant.uuid);
+      //this.rolesService.updateApplicant(user.role.applicant as ApplicantUpdateDto, user.role.applicant.uuid);
 
     }
 

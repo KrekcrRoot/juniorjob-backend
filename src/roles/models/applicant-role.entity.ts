@@ -1,6 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsNotEmpty, IsString, IsUUID } from 'class-validator';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Competence } from '../../competencies/competence.entity';
 
 @Entity('Applicants')
 export class Applicant {
@@ -64,14 +73,25 @@ export class Applicant {
   @Column({ default: '' })
   inn: string;
 
-  @IsNotEmpty()
+  @ApiProperty({
+    example: [Competence],
+    description: 'Competence tag',
+  })
+  @ManyToMany(
+    () => Competence,
+    (competence) => competence.uuid,
+  )
+  @JoinTable()
+  competencies: Competence[];
+
+  /*@IsNotEmpty()
   @IsString()
   @ApiProperty({
     example: '[\'programming\']',
     description: 'Applicant competitions in json array',
   })
   @Column({ default: '' })
-  competitions: string;
+  competitions: string;*/
 
   @IsNotEmpty()
   @IsString()

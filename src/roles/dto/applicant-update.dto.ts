@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDateString, IsNotEmpty, IsString } from "class-validator";
+import { ArrayMinSize, IsArray, IsDateString, IsNotEmpty, IsString } from 'class-validator';
 
 export class ApplicantUpdateDto {
   @IsNotEmpty()
@@ -41,13 +41,22 @@ export class ApplicantUpdateDto {
   })
   inn: string;
 
-  @IsNotEmpty()
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1)
   @ApiProperty({
-    example: '[\'coding\']',
-    description: 'Comptetitions in JSON array',
+    example: ['tag'],
+    description: 'Competencies in array',
   })
-  competitions: string;
+  competencies_titles: string[];
+
+  // @IsNotEmpty()
+  // @IsString()
+  // @ApiProperty({
+  //   example: '[\'coding\']',
+  //   description: 'Comptetitions in JSON array',
+  // })
+  // competitions: string;
 
   @IsNotEmpty()
   @IsString()
