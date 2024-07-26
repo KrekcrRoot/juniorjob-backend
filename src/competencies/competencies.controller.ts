@@ -9,7 +9,12 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CompetenciesService } from './competencies.service';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CompetenceStoreDto } from './dto/competenceStore.dto';
 import { AccessTokenGuard } from '../common/guards/accessToken.guard';
 import { Roles } from '../roles/roles.decorator';
@@ -26,6 +31,7 @@ export class CompetenciesController {
   @ApiResponse({
     status: HttpStatus.OK,
     type: Competence,
+    isArray: true,
     description: 'Get all competencies',
   })
   @ApiOperation({ summary: 'Get all competencies' })
