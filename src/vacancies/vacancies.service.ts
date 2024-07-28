@@ -60,6 +60,9 @@ export class VacanciesService {
     createVacancyDto: CreateVacancyDto,
     user: User,
   ): Promise<Vacancy> {
+
+    if (user.banned) throw new BadRequestException(responses.bannedUser);
+
     const category = await this.vacancyCategoryRepository.findOneBy({
       uuid: createVacancyDto.category_uuid,
     });
@@ -153,7 +156,7 @@ export class VacanciesService {
       },
     });
 
-    let vacancy = await this.vacancyRepository.findOne({
+    const vacancy = await this.vacancyRepository.findOne({
       where: {
         uuid: vacancyResponse.vacancy.uuid,
         deleted: false,
@@ -216,6 +219,8 @@ export class VacanciesService {
       throw new ForbiddenException(responses.accessDenied);
     }
 
+    if (vacancy.employer.banned) throw new BadRequestException(responses.bannedUser);
+
     vacancy.deleted = true;
 
     await this.vacancyRepository.save(vacancy);
@@ -237,6 +242,8 @@ export class VacanciesService {
 
     if (!vacancy)
       throw new BadRequestException(responses.doesntExistUUID('Vacancy'));
+
+    if (vacancy.employer.banned) throw new BadRequestException(responses.bannedUser);
 
     vacancy.image = imageUrl;
 
@@ -270,6 +277,8 @@ export class VacanciesService {
     if (user.role != UserRole.Moderator && vacancy.employer.uuid != user.uuid) {
       throw new ForbiddenException(responses.accessDenied);
     }
+
+    if (vacancy.employer.banned) throw new BadRequestException(responses.bannedUser);
 
     vacancy = {
       uuid: vacancy.uuid,

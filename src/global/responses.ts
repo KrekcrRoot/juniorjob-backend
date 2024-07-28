@@ -10,6 +10,7 @@ export default {
     logoutUnsuccessed: 'Logout unsuccessed',
     accessDenied: 'Access denied',
     refreshTokenExpiredOrInvalid: 'Refresh token expired or invalid',
+    bannedUser: 'Account has been blocked',
     notFound(who: string): string {
         return `${who} not found`;
     },

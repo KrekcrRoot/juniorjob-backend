@@ -118,7 +118,7 @@ export class UsersService {
           legal_entity: true,
           moderator: true,
         },
-      }
+      },
     });
 
     if (!user || user.deleted) return null;
@@ -133,7 +133,7 @@ export class UsersService {
       relations: {
         city: true,
         role: true,
-      }
+      },
     });
 
     if (!user || user.deleted) return null;
@@ -183,7 +183,7 @@ export class UsersService {
       this.individualRepository.save(individual);
       this.legalEntityRepository.save(legal_entity);
       this.moderatorRepository.save(moderator);
-    })()
+    })();
 
     return userRes;
   }
@@ -209,13 +209,14 @@ export class UsersService {
       where: {
         uuid: user_uuid,
         deleted: false,
-        banned: false,
       },
     });
 
     if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
+
+    if (user.banned) throw new BadRequestException(responses.bannedUser);
 
     const result = await argon2.verify(user.password, changeEmailDto.password);
     if (!result) throw new HttpException(responses.accessDenied, 401);
@@ -244,6 +245,8 @@ export class UsersService {
     if (!user) {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
+
+    if (user.banned) throw new BadRequestException(responses.bannedUser);
 
     const result = await argon2.verify(
       user.password,
@@ -316,12 +319,16 @@ export class UsersService {
       throw new BadRequestException(responses.doesntExistUUID('User'));
     }
 
-    if(user.image !== 'image.png') {
-      deleteFile(join(
-        this.configService.get<string>('STORAGE_FOLDER'),
-        constants.usersFolder,
-        user.image,
-      ))
+    if (user.banned) throw new BadRequestException(responses.bannedUser);
+
+    if (user.image !== 'image.png') {
+      deleteFile(
+        join(
+          this.configService.get<string>('STORAGE_FOLDER'),
+          constants.usersFolder,
+          user.image,
+        ),
+      );
     }
 
     user.image = image;
