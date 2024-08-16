@@ -267,7 +267,7 @@ export class RolesService {
 
     if (changeRoleDto.role == 'moderator') {
       throw new ForbiddenException(
-        responses.permission('change role to moderator'),
+        responses.permission('изменения роли на модератора'),
       );
     }
 

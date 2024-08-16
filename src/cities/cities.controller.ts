@@ -49,7 +49,7 @@ export class CitiesController {
   getByName(@Param() params: any): Promise<City | undefined> {
     if (params.name.trim() === '') {
       throw new HttpException(
-        responses.notValid('city name'),
+        responses.notValid('Имя города'),
         HttpStatus.BAD_REQUEST,
       );
     }

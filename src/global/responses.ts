@@ -1,32 +1,32 @@
 
 export default {
-    uuidNotValid: 'UUID is not valid',
-    noUserWithThisEmail: 'There is no user with this email',
-    loginOrPasswordIncorrect: 'Login or password is incorrect',
-    accessTokenInvalid: 'Access token is invalid',
-    userAlreadyHaveRole: 'The user already has this role',
-    userIsNotLogged: 'User is not logged',
-    logoutSuccess: 'Logout success',
-    logoutUnsuccessed: 'Logout unsuccessed',
-    accessDenied: 'Access denied',
-    refreshTokenExpiredOrInvalid: 'Refresh token expired or invalid',
-    bannedUser: 'Account has been blocked',
+    uuidNotValid: 'Идентификатор недействителен',
+    noUserWithThisEmail: 'Пользователя с такой почтой не существует',
+    loginOrPasswordIncorrect: 'Неверный логин или пароль',
+    accessTokenInvalid: 'Токен доступа недействителен',
+    userAlreadyHaveRole: 'Пользователь уже имеет эту роль',
+    userIsNotLogged: 'Пользователь не авторизован',
+    logoutSuccess: 'Выход из системы выполнен успешно',
+    logoutUnsuccessed: 'Выход из системы не выполнен',
+    accessDenied: 'Доступ запрещён',
+    refreshTokenExpiredOrInvalid: 'Срок действия токена обновления истек или недействителен',
+    bannedUser: 'Аккаунт был заблокирован',
     notFound(who: string): string {
-        return `${who} not found`;
+        return `${who} не найдено`;
     },
     doesntExistUUID(who: string): string {
-        return `${who} doesn\'t exist with this uuid`;
+        return `${who} не найдено с таким идентификатором`;
     },
     doesntExist(who: string): string {
-        return `${who} doesn\t exist`;
+        return `${who} не существует`;
     },
     alreadyExist(who: string): string {
-        return `${who} already exist`;
+        return `${who} уже существует`;
     },
     permission(what: string): string {
-        return `You don\'t have permissions for ${what}`;
+        return `У вас нет прав для ${what}`;
     },
     notValid(what: string): string {
-        return `Not valid ${what}`;
+        return `${what} недействительно`;
     }
 }
